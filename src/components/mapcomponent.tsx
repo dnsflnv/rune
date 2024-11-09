@@ -1,5 +1,6 @@
 import { LayerGroup, MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+
+
 
 export const MapComponent = () => 
    (
