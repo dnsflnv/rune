@@ -7,9 +7,9 @@ export const MapComponent = () =>
     <MapContainer
         center={[59.4439, 18.0703]}
         zoom={13}
-        style={{ height: '80vh', width: '100%' }}
     >
-      <TileLayer url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" />
+      {/* <TileLayer url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" /> */}
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <LayerGroup>
         <Marker position={[59.4439, 18.0703]}>
           <Popup>

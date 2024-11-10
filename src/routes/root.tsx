@@ -55,7 +55,11 @@ export const Root = () => {
                 }
               ]} />
           </Sider>
-          <Content><MapComponent /></Content>
+          <Content>
+
+              <MapComponent />
+  
+          </Content>
         </Layout>
       </Content>
       <Footer>©2024 <a href="https://norr.dev">norr.dev</a></Footer>
