@@ -1,27 +1,52 @@
-import { LayerGroup, MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import Map from 'ol/Map.js';
+import OSM from 'ol/source/OSM.js';
+import TileLayer from 'ol/layer/Tile.js';
+import View from 'ol/View.js';
+import { useEffect } from 'react';
+import { Point } from 'ol/geom';
+import { Feature } from 'ol';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import { fromLonLat } from 'ol/proj';
 
+export const MapComponent = () => {
+  useEffect(() => {
+    const map = new Map({
+      target: 'map',
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+      ],
+      view: new View({
+        center: fromLonLat([18.0686, 59.3293]),
+        zoom: 13,
+      }),
+    });
 
+    // Add vector layer for markers
+    const markerLayer = new VectorLayer({
+      source: new VectorSource({
+        features: [
+          new Feature({
+            geometry: new Point(fromLonLat([18.0686, 59.3293])),
+          }),
+          new Feature({
+            geometry: new Point(fromLonLat([18.0686, 59.3293])), 
+          })
+        ]
+      })
+    });
 
-export const MapComponent = () => 
-   (
-    <MapContainer
-        center={[59.4439, 18.0703]}
-        zoom={13}
-    >
-      {/* <TileLayer url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" /> */}
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <LayerGroup>
-        <Marker position={[59.4439, 18.0703]}>
-          <Popup>
-            A marker in Stockholm
-          </Popup>
-        </Marker>
-        <Marker position={[59.4429, 18.0723]}>
-          <Popup>
-            Another nearby marker
-          </Popup>
-        </Marker>
-      </LayerGroup>
-    </MapContainer>
+    map.addLayer(markerLayer);
+
+    return () => {
+      map.setTarget(undefined);
+    };
+  }, []);
+
+  return (
+    <div id="map"></div>
   );
+};
 

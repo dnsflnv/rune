@@ -3,7 +3,7 @@ import { Header, Content, Footer } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import { MapComponent } from "../components/mapcomponent";
 import { useNavigate } from "react-router-dom";
-
+import '../style.css';
 export const Root = () => {
   const navigate = useNavigate();
   return (
