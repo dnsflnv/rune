@@ -1,35 +1,37 @@
-import { Layout, Menu } from "antd";
-import { Header, Content, Footer } from "antd/es/layout/layout";
-import Sider from "antd/es/layout/Sider";
-import { MapComponent } from "../components/mapcomponent";
-import { useNavigate } from "react-router-dom";
-import '../style.css';
+import { Layout, Menu } from 'antd';
+import { Header, Content, Footer } from 'antd/es/layout/layout';
+import Sider from 'antd/es/layout/Sider';
+import { MapComponent } from '../components/mapcomponent';
+import { useNavigate } from 'react-router-dom';
 export const Root = () => {
   const navigate = useNavigate();
   return (
     <Layout>
       <Header>
-        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']} items={[
-          {
-            key: '1',
-            label: 'Map',
-            onClick: () => {
-              navigate('/');
-            }
-          },
-          {
-            key: '2',
-            label: 'About',
-            onClick: () => {
-              navigate('/about');
-            }
-          }
-        ]} />
+        <Menu
+          theme="dark"
+          mode="horizontal"
+          defaultSelectedKeys={['1']}
+          items={[
+            {
+              key: '1',
+              label: 'Map',
+              onClick: () => {
+                navigate('/');
+              },
+            },
+            {
+              key: '2',
+              label: 'About',
+              onClick: () => {
+                navigate('/about');
+              },
+            },
+          ]}
+        />
       </Header>
       <Content>
-        <Layout
-          style={{ background: '#fff' }}
-        >
+        <Layout style={{ background: '#fff' }}>
           <Sider style={{ background: '#fff' }} width={200}>
             <Menu
               mode="inline"
@@ -39,30 +41,31 @@ export const Root = () => {
               items={[
                 {
                   key: '1',
-                  label: 'Runestones'
+                  label: 'Runestones',
                 },
                 {
                   key: '2',
-                  label: 'Mounds & burials'
+                  label: 'Mounds & burials',
                 },
                 {
                   key: '3',
-                  label: 'Picturestones'
+                  label: 'Picturestones',
                 },
                 {
                   key: '4',
-                  label: 'Bronze Age'
-                }
-              ]} />
+                  label: 'Bronze Age',
+                },
+              ]}
+            />
           </Sider>
           <Content>
-
-              <MapComponent />
-  
+            <MapComponent />
           </Content>
         </Layout>
       </Content>
-      <Footer>©2024 <a href="https://norr.dev">norr.dev</a></Footer>
+      <Footer>
+        ©2024 <a href="https://norr.dev">norr.dev</a>
+      </Footer>
     </Layout>
   );
-}
+};
