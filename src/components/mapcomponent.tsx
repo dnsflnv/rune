@@ -12,6 +12,7 @@ import 'ol/ol.css';
 import Icon from 'ol/style/Icon';
 import Style from 'ol/style/Style';
 import Overlay from 'ol/Overlay';
+import XYZ from 'ol/source/XYZ';
 
 export const MapComponent = () => {
   useEffect(() => {
@@ -19,7 +20,10 @@ export const MapComponent = () => {
       target: 'map',
       layers: [
         new TileLayer({
-          source: new OSM(),
+          source: new XYZ({
+            url: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
+            attributions: '© OpenTopoMap contributors'
+          }),
         }),
       ],
       view: new View({
@@ -129,7 +133,7 @@ export const MapComponent = () => {
     <div id="map" style={{ 
       width: '100%', 
       height: 'calc(100vh - 130px)',
-      filter: 'grayscale(30%)'
+      filter: 'sepia(30%)'
     }}></div>
   );
 };
