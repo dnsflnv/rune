@@ -126,6 +126,10 @@ export const MapComponent = () => {
   }, []);
 
   return (
-    <div id="map" style={{ width: '100%', height: 'calc(100vh - 130px)' }}></div>
+    <div id="map" style={{ 
+      width: '100%', 
+      height: 'calc(100vh - 130px)',
+      filter: 'grayscale(30%)'
+    }}></div>
   );
 };
