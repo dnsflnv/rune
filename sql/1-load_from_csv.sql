@@ -1,4 +1,4 @@
-CREATE TABLE newtable (
+CREATE TABLE rundata (
     signum TEXT,
     plats TEXT,
     socken TEXT,
@@ -23,7 +23,7 @@ CREATE TABLE newtable (
     bildlank TEXT
 );
 
-COPY newtable(
+COPY rundata(
     signum,
     plats,
     socken,
