@@ -14,6 +14,7 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.47.10",
     "antd": "^5.22.7",
+    "dotenv": "^16.4.7",
     "ol": "^10.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
