@@ -104,7 +104,11 @@ export const Root = () => {
             ©2024 <a href="https://norr.dev">norr.dev</a>
           </Footer>
         </Layout>
-      </ConfigProvider>
-    );
-  }
+      </Content>
+      {/* <Footer>
+        ©2024 <a href="https://norr.dev">norr.dev</a>
+      </Footer> */}
+    </Layout>
+    </ConfigProvider>
+  );
 };

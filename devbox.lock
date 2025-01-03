@@ -1,6 +1,34 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "glibcLocales@latest": {
+      "last_modified": "2024-12-03T12:40:06Z",
+      "resolved": "github:NixOS/nixpkgs/566e53c2ad750c84f6d31f9ccb9d00f823165550#glibcLocales",
+      "source": "devbox-search",
+      "version": "2.40-36",
+      "systems": {
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/jzxq24a1ljrb404d9z6jflaam849y27j-glibc-locales-2.40-36",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/jzxq24a1ljrb404d9z6jflaam849y27j-glibc-locales-2.40-36"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/wcmn60d6c7cf18l8imadpydlv58z87g9-glibc-locales-2.40-36",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/wcmn60d6c7cf18l8imadpydlv58z87g9-glibc-locales-2.40-36"
+        }
+      }
+    },
     "nodejs@22.10.0": {
       "last_modified": "2024-11-16T04:25:12Z",
       "plugin_version": "0.0.2",
