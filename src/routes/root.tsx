@@ -40,92 +40,105 @@ export const Root = () => {
     }
   };
 
-  if (!session) {
-    return (
-      <div
-        style={{
-          maxWidth: '400px',
-          margin: 'auto',
-          padding: '20px',
-          boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-          borderRadius: '8px',
-        }}
-      >
-        <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
-      </div>
-    );
-  } else {
-    return (
-      <ConfigProvider
-        theme={{
-          algorithm: theme.defaultAlgorithm,
-          token: {
-            colorPrimary: '#866c53',
-            colorInfo: '#866c53',
-            colorSuccess: '#eed0a8',
-            colorError: '#df6446',
-            colorTextBase: '#866c53',
-          },
-        }}
-      >
-        <Layout>
-          <Content>
-            <Layout style={{ height: '100vh', paddingBottom: 20 }}>
-              <Sider
+  return (
+    <ConfigProvider
+      theme={{
+        algorithm: theme.defaultAlgorithm,
+        token: {
+          colorPrimary: '#866c53',
+          colorInfo: '#866c53',
+          colorSuccess: '#eed0a8',
+          colorError: '#df6446',
+          colorTextBase: '#866c53',
+        },
+      }}
+    >
+      <Layout>
+        <Content>
+          <Layout style={{ height: '100vh' }}>
+            <Sider
+              style={{
+                background: '#fff',
+                borderRight: '1px solid #f0f0f0',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+              width={250}
+            >
+              <Menu
+                mode="inline"
+                defaultSelectedKeys={['1']}
                 style={{
-                  background: '#fff',
-                  borderRight: '1px solid #f0f0f0',
-                  height: '100%',
-                  position: 'relative',
+                  flex: 1,
+                  borderRight: 0,
                 }}
-                width={250}
+                items={[
+                  {
+                    key: '1',
+                    label: 'Runestones',
+                  },
+                  {
+                    key: '2',
+                    label: 'Mounds & burials',
+                  },
+                  {
+                    key: '3',
+                    label: 'Picturestones',
+                  },
+                  {
+                    key: '4',
+                    label: 'Bronze Age',
+                  },
+                ]}
+              />
+              <div
+                style={{
+                  padding: '20px',
+                  borderTop: '1px solid #f0f0f0',
+                  background: 'white',
+                }}
               >
-                <Menu
-                  mode="inline"
-                  defaultSelectedKeys={['1']}
-                  style={{
-                    height: 'calc(100% - 50px)',
-                    borderRight: 0,
-                  }}
-                  items={[
-                    {
-                      key: '1',
-                      label: 'Runestones',
-                    },
-                    {
-                      key: '2',
-                      label: 'Mounds & burials',
-                    },
-                    {
-                      key: '3',
-                      label: 'Picturestones',
-                    },
-                    {
-                      key: '4',
-                      label: 'Bronze Age',
-                    },
-                  ]}
-                />
-                <Button
-                  type="link"
-                  onClick={handleLogout}
-                  style={{
-                    position: 'absolute',
-                    bottom: 20,
-                    left: 24,
-                    color: '#866c53',
-                  }}
-                >
-                  Logout
-                </Button>
-              </Sider>
-              <Content>
-                <MapComponent />
-              </Content>
-            </Layout>
-          </Content>
-        </Layout>
-      </ConfigProvider>
-    );
-  }
+                {!session ? (
+                  <Auth
+                    supabaseClient={supabase}
+                    appearance={{
+                      theme: ThemeSupa,
+                      variables: {
+                        default: {
+                          colors: {
+                            brand: '#866c53',
+                            brandAccent: '#866c53',
+                            brandButtonText: 'white',
+                          },
+                        },
+                      },
+                      style: {
+                        button: {
+                          background: '#866c53',
+                          color: 'white',
+                          border: 'none',
+                        },
+                        anchor: {
+                          color: '#866c53',
+                        },
+                      },
+                    }}
+                    providers={[]}
+                  />
+                ) : (
+                  <Button type="link" onClick={handleLogout}>
+                    Logout ({session.user.email})
+                  </Button>
+                )}
+              </div>
+            </Sider>
+            <Content>
+              <MapComponent />
+            </Content>
+          </Layout>
+        </Content>
+      </Layout>
+    </ConfigProvider>
+  );
 };
