@@ -1,5 +1,4 @@
 import Map from 'ol/Map.js';
-import OSM from 'ol/source/OSM.js';
 import TileLayer from 'ol/layer/Tile.js';
 import View from 'ol/View.js';
 import { useEffect } from 'react';
@@ -13,6 +12,7 @@ import Icon from 'ol/style/Icon';
 import Style from 'ol/style/Style';
 import Overlay from 'ol/Overlay';
 import XYZ from 'ol/source/XYZ';
+import '/src/style.css';
 
 export const MapComponent = () => {
   useEffect(() => {
@@ -22,7 +22,7 @@ export const MapComponent = () => {
         new TileLayer({
           source: new XYZ({
             url: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
-            attributions: '© OpenTopoMap contributors'
+            attributions: '© OpenTopoMap contributors',
           }),
         }),
       ],
@@ -54,15 +54,15 @@ export const MapComponent = () => {
           new Feature({
             geometry: new Point(fromLonLat([18.0686, 59.3293])),
             name: 'Marker 1',
-            description: 'This is marker 1'
+            description: 'This is marker 1',
           }),
           new Feature({
             geometry: new Point(fromLonLat([18.0686, 59.3293])),
             name: 'Marker 2',
-            description: 'This is marker 2<br> sdflasfasdfsdfsadf'
-          })
-        ]
-      })
+            description: 'This is marker 2<br> sdflasfasdfsdfsadf',
+          }),
+        ],
+      }),
     });
 
     const markerStyle = new Style({
@@ -79,7 +79,7 @@ export const MapComponent = () => {
     // Add click handler
     map.on('click', (evt) => {
       const feature = map.forEachFeatureAtPixel(evt.pixel, (feature) => feature);
-      
+
       if (feature) {
         const geometry = feature.getGeometry();
         const coordinates = geometry instanceof Point ? geometry.getCoordinates() : undefined;
@@ -129,11 +129,5 @@ export const MapComponent = () => {
     };
   }, []);
 
-  return (
-    <div id="map" style={{ 
-      width: '100%', 
-      height: 'calc(100vh - 130px)',
-      filter: 'sepia(30%)'
-    }}></div>
-  );
+  return <div id="map"></div>;
 };

@@ -1,5 +1,6 @@
-import { ConfigProvider, Layout, Menu, theme } from 'antd';
-import { Header, Content, Footer } from 'antd/es/layout/layout';
+/// <reference types="vite/client" />
+import { ConfigProvider, Layout, Menu, theme, Button } from 'antd'; // Add Button import
+import { Content } from 'antd/es/layout/layout';
 import Sider from 'antd/es/layout/Sider';
 import { MapComponent } from '../components/mapcomponent';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +9,10 @@ import { createClient } from '@supabase/supabase-js';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 
-const supabase = createClient('', '');
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const Root = () => {
   const [session, setSession] = useState(null);
@@ -27,8 +31,29 @@ export const Root = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setSession(null);
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   if (!session) {
-    return <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />;
+    return (
+      <div
+        style={{
+          maxWidth: '400px',
+          margin: 'auto',
+          padding: '20px',
+          boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+          borderRadius: '8px',
+        }}
+      >
+        <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
+      </div>
+    );
   } else {
     return (
       <ConfigProvider
@@ -44,37 +69,24 @@ export const Root = () => {
         }}
       >
         <Layout>
-          <Header>
-            <Menu
-              theme="dark"
-              mode="horizontal"
-              defaultSelectedKeys={['1']}
-              items={[
-                {
-                  key: '1',
-                  label: 'Map',
-                  onClick: () => {
-                    navigate('/');
-                  },
-                },
-                {
-                  key: '2',
-                  label: 'About',
-                  onClick: () => {
-                    navigate('/about');
-                  },
-                },
-              ]}
-            />
-          </Header>
           <Content>
-            <Layout style={{ background: '#fff' }}>
-              <Sider style={{ background: '#fff' }} width={200}>
+            <Layout style={{ height: '100vh', paddingBottom: 20 }}>
+              <Sider
+                style={{
+                  background: '#fff',
+                  borderRight: '1px solid #f0f0f0',
+                  height: '100%',
+                  position: 'relative',
+                }}
+                width={250}
+              >
                 <Menu
                   mode="inline"
                   defaultSelectedKeys={['1']}
-                  defaultOpenKeys={['sub1']}
-                  style={{ height: '100%' }}
+                  style={{
+                    height: 'calc(100% - 50px)',
+                    borderRight: 0,
+                  }}
                   items={[
                     {
                       key: '1',
@@ -94,21 +106,26 @@ export const Root = () => {
                     },
                   ]}
                 />
+                <Button
+                  type="link"
+                  onClick={handleLogout}
+                  style={{
+                    position: 'absolute',
+                    bottom: 20,
+                    left: 24,
+                    color: '#866c53',
+                  }}
+                >
+                  Logout
+                </Button>
               </Sider>
               <Content>
                 <MapComponent />
               </Content>
             </Layout>
           </Content>
-          <Footer>
-            ©2024 <a href="https://norr.dev">norr.dev</a>
-          </Footer>
         </Layout>
-      </Content>
-      {/* <Footer>
-        ©2024 <a href="https://norr.dev">norr.dev</a>
-      </Footer> */}
-    </Layout>
-    </ConfigProvider>
-  );
+      </ConfigProvider>
+    );
+  }
 };
