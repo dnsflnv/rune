@@ -1,34 +1,6 @@
 {
   "lockfile_version": "1",
   "packages": {
-    "glibcLocales@latest": {
-      "last_modified": "2024-12-03T12:40:06Z",
-      "resolved": "github:NixOS/nixpkgs/566e53c2ad750c84f6d31f9ccb9d00f823165550#glibcLocales",
-      "source": "devbox-search",
-      "version": "2.40-36",
-      "systems": {
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/jzxq24a1ljrb404d9z6jflaam849y27j-glibc-locales-2.40-36",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/jzxq24a1ljrb404d9z6jflaam849y27j-glibc-locales-2.40-36"
-        },
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/wcmn60d6c7cf18l8imadpydlv58z87g9-glibc-locales-2.40-36",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/wcmn60d6c7cf18l8imadpydlv58z87g9-glibc-locales-2.40-36"
-        }
-      }
-    },
     "nodejs@22.10.0": {
       "last_modified": "2024-11-16T04:25:12Z",
       "plugin_version": "0.0.2",
@@ -280,6 +252,54 @@
             }
           ],
           "store_path": "/nix/store/0z5iwcvalafm3j2c5pfhllsfbxrbyzf4-postgresql-16.5"
+        }
+      }
+    },
+    "supabase-cli@latest": {
+      "last_modified": "2024-12-31T22:49:03Z",
+      "resolved": "github:NixOS/nixpkgs/81934660d6e9ea54d2f0cdee821e8533b10c221a#supabase-cli",
+      "source": "devbox-search",
+      "version": "2.2.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4w86y5q8kgnyjd5d9mdx4b1yhb3xqv84-supabase-cli-2.2.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/4w86y5q8kgnyjd5d9mdx4b1yhb3xqv84-supabase-cli-2.2.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7ralicmssjfrg4nndq4sirjdh58cji9p-supabase-cli-2.2.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7ralicmssjfrg4nndq4sirjdh58cji9p-supabase-cli-2.2.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mf2nlgh4ckfrgbwi85ffdyzm2j4rs9w9-supabase-cli-2.2.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mf2nlgh4ckfrgbwi85ffdyzm2j4rs9w9-supabase-cli-2.2.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/vffxn5zxwzy7bd2vwz8qdskrpg488vd6-supabase-cli-2.2.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/vffxn5zxwzy7bd2vwz8qdskrpg488vd6-supabase-cli-2.2.1"
         }
       }
     }

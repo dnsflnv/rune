@@ -1,10 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.13.6/.schema/devbox.schema.json",
   "packages": [
-    "glibcLocales@latest",
+    // "glibcLocales@latest",
     "nodejs@22.10.0",
     "postgresql@latest",
-    "postgresql16Packages.postgis@latest"
+    "postgresql16Packages.postgis@latest",
+    "supabase-cli@latest",
   ],
   "shell": {
     "init_hook": ["export PS1='📦 devbox> '", "devbox run init"],
@@ -20,20 +21,16 @@
         "devbox run services",
         "createuser -s -h localhost -p 5432 postgres",
         "psql -h localhost -U postgres -c \"CREATE EXTENSION IF NOT EXISTS postgis;\"",
-        "npm i"
+        "npm i",
       ],
       "services": [
         "echo 'Starting postgres'",
         "pg_ctl -D ./pgdata -l logfile -o \"-c unix_socket_directories='${PWD}/pgdata'\" start",
-        "echo 'All services started!'"
+        "echo 'All services started!'",
       ],
       "start": ["devbox run services"],
-      "stop": [
-        "pg_ctl -D ./pgdata stop",
-        "echo 'All services stopped!'"
-      ],
-      "test": ["echo \"Error: no test specified\" && exit 1"]
-    
-    }
-  }
+      "stop":  ["pg_ctl -D ./pgdata stop", "echo 'All services stopped!'"],
+      "test":  ["echo \"Error: no test specified\" && exit 1"],
+    },
+  },
 }

@@ -1,7 +1,7 @@
 import Map from 'ol/Map.js';
 import TileLayer from 'ol/layer/Tile.js';
 import View from 'ol/View.js';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Point } from 'ol/geom';
 import { Feature } from 'ol';
 import VectorLayer from 'ol/layer/Vector';
@@ -13,8 +13,47 @@ import Style from 'ol/style/Style';
 import Overlay from 'ol/Overlay';
 import XYZ from 'ol/source/XYZ';
 import '/src/style.css';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+interface Marker {
+  signum: string;
+  geom: {
+    type: string;
+    coordinates: number[];
+  };
+}
 
 export const MapComponent = () => {
+  const [markers, setMarkers] = useState<Marker[]>([]);
+  const [map, setMap] = useState<Map | null>(null);
+
+  const fetchVisibleMarkers = async (extent: number[]) => {
+    const [minLon, minLat, maxLon, maxLat] = extent.map((coord, i) => {
+      const [lon, lat] = fromLonLat([coord, extent[i + 1]], 'EPSG:4326');
+      return i % 2 === 0 ? lon : lat;
+    });
+
+    const { data, error } = await supabase.schema('rune').rpc('get_visible_markers', {
+      max_lat: maxLat,
+      max_lon: maxLon,
+      min_lat: minLat,
+      min_lon: minLon,
+    });
+
+    if (error) {
+      console.error('Error fetching markers:', error);
+      return;
+    }
+
+    if (data) {
+      setMarkers(data);
+    }
+  };
+
   useEffect(() => {
     const map = new Map({
       target: 'map',
@@ -50,18 +89,14 @@ export const MapComponent = () => {
     // Add vector layer for markers
     const markerLayer = new VectorLayer({
       source: new VectorSource({
-        features: [
-          new Feature({
-            geometry: new Point(fromLonLat([18.0686, 59.3293])),
-            name: 'Marker 1',
-            description: 'This is marker 1',
-          }),
-          new Feature({
-            geometry: new Point(fromLonLat([18.0686, 59.3293])),
-            name: 'Marker 2',
-            description: 'This is marker 2<br> sdflasfasdfsdfsadf',
-          }),
-        ],
+        features: markers.map(
+          (marker) =>
+            new Feature({
+              geometry: new Point(fromLonLat(marker.geom.coordinates)),
+              name: marker.signum,
+              description: marker.signum,
+            })
+        ),
       }),
     });
 
@@ -124,10 +159,17 @@ export const MapComponent = () => {
       }
     });
 
+    map.on('moveend', () => {
+      const extent = map.getView().calculateExtent(map.getSize());
+      fetchVisibleMarkers(extent);
+    });
+
+    setMap(map);
+
     return () => {
       map.setTarget(undefined);
     };
-  }, []);
+  }, [markers]);
 
   return <div id="map"></div>;
 };
