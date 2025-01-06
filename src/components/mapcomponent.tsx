@@ -29,7 +29,7 @@ interface Marker {
 
 export const MapComponent = () => {
   const [markers, setMarkers] = useState<Marker[]>([]);
-  const [map, setMap] = useState<Map | null>(null);
+  const [mapState, setMap] = useState<Map | null>(null);
 
   const fetchVisibleMarkers = async (extent: number[]) => {
     const [minLon, minLat, maxLon, maxLat] = extent.map((coord, i) => {
