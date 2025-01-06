@@ -19,40 +19,27 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-interface Marker {
-  signum: string;
-  geom: {
-    type: string;
-    coordinates: number[];
-  };
-}
-
 export const MapComponent = () => {
-  const [markers, setMarkers] = useState<Marker[]>([]);
-  const [mapState, setMap] = useState<Map | null>(null);
+  const [markers, setMarkers] = useState<{ signum: string; geom: { type: string; coordinates: number[] } }[]>([]);
 
-  const fetchVisibleMarkers = async (extent: number[]) => {
-    const [minLon, minLat, maxLon, maxLat] = extent.map((coord, i) => {
-      const [lon, lat] = fromLonLat([coord, extent[i + 1]], 'EPSG:4326');
-      return i % 2 === 0 ? lon : lat;
-    });
+  useEffect(() => {
+    const fetchMarkers = async () => {
+      const { data, error } = await supabase.schema('rune').rpc('get_markers');
 
-    const { data, error } = await supabase.schema('rune').rpc('get_visible_markers', {
-      max_lat: maxLat,
-      max_lon: maxLon,
-      min_lat: minLat,
-      min_lon: minLon,
-    });
+      console.log(data);
 
-    if (error) {
-      console.error('Error fetching markers:', error);
-      return;
-    }
+      if (error) {
+        console.error('Error fetching markers:', error);
+        return;
+      }
 
-    if (data) {
-      setMarkers(data);
-    }
-  };
+      if (data) {
+        setMarkers(data);
+      }
+    };
+
+    fetchMarkers();
+  }, []);
 
   useEffect(() => {
     const map = new Map({
@@ -158,13 +145,6 @@ export const MapComponent = () => {
         overlay.setPosition(undefined);
       }
     });
-
-    map.on('moveend', () => {
-      const extent = map.getView().calculateExtent(map.getSize());
-      fetchVisibleMarkers(extent);
-    });
-
-    setMap(map);
 
     return () => {
       map.setTarget(undefined);
