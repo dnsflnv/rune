@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GeolocateControl, Map, Popup, GeoJSONSource, Marker } from 'maplibre-gl';
-import { sqliteService } from '../services/sqliteService';
 import { runestonesCache } from '../services/runestonesCache';
 
 interface Runestone {

@@ -78,7 +78,7 @@ class RunestonesCache {
         const key = this.boundsKey(bounds);
         
         // Check if we have data for similar bounds
-        for (const [cachedKey, cachedBounds] of this.cachedBounds.entries()) {
+        for (const [_cachedKey, cachedBounds] of this.cachedBounds.entries()) {
             if (this.boundsOverlap(bounds, cachedBounds)) {
                 console.log('Using overlapping cached bounds');
                 const allStones = await db.getAll('runestones');

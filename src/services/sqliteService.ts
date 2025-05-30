@@ -160,7 +160,7 @@ class SQLiteService {
   }
 
   // Keep the chunked method but make it more efficient
-  async getRunestonesChunked(bounds?: [number, number, number, number], chunkSize: number = 1000): Promise<Runestone[]> {
+  async getRunestonesChunked(bounds?: [number, number, number, number], _chunkSize: number = 1000): Promise<Runestone[]> {
     // For now, just use the regular method since we added LIMIT
     return this.getRunestones(bounds);
   }
