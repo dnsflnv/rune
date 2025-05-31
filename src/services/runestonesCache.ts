@@ -58,7 +58,29 @@ class RunestonesCache {
 
     private async initializeCache() {
         if (this.isInitialized) return;
-        // Don't preload data - just mark as initialized
+        
+        const db = await this.db;
+        
+        // Check if we already have data in the cache
+        const existingData = await db.count('runestones');
+        
+        if (existingData === 0) {
+            try {
+                // Load all runestones from SQLite without bounds restriction
+                const allRunestones = await sqliteService.getRunestones();
+                await this.updateCache(allRunestones);
+                
+                // Mark that we have all data cached by setting a special bounds entry
+                this.cachedBounds.set('*', [-180, -90, 180, 90]); // Global bounds
+                
+            } catch (error) {
+                console.error('Failed to initialize cache with all runestones:', error);
+            }
+        } else {
+            // We already have data, assume it's complete and set global bounds
+            this.cachedBounds.set('*', [-180, -90, 180, 90]);
+        }
+        
         this.isInitialized = true;
     }
 
@@ -74,11 +96,18 @@ class RunestonesCache {
     }
 
     async getRunestones(bounds: [number, number, number, number]): Promise<Runestone[]> {
+        await this.initializeCache(); // Ensure cache is initialized
+        
         const db = await this.db;
         const key = this.boundsKey(bounds);
         
-        // Check if we already have overlapping cached data
-        // Check if we have data for similar bounds
+        // Check if we have all data cached (global bounds entry exists)
+        if (this.cachedBounds.has('*')) {
+            const allStones = await db.getAll('runestones');
+            return this.filterByBounds(allStones, bounds);
+        }
+        
+        // Check if we have overlapping cached data for this specific region
         for (const [_cachedKey, cachedBounds] of this.cachedBounds.entries()) {
             if (this.boundsOverlap(bounds, cachedBounds)) {
                 const allStones = await db.getAll('runestones');

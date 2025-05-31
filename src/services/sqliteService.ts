@@ -111,7 +111,6 @@ class SQLiteService {
     }
 
     try {
-      const start = performance.now();
       const stmt = this.db.prepare(query);
       if (params.length > 0) {
         stmt.bind(params);
@@ -148,7 +147,6 @@ class SQLiteService {
       }
       
       stmt.free();
-      const end = performance.now();
       
       return runestones;
     } catch (error) {

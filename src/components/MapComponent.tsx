@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { GeolocateControl, Map, Popup, GeoJSONSource, Marker } from 'maplibre-gl';
+import { GeolocateControl, Map, Popup, GeoJSONSource } from 'maplibre-gl';
 import { runestonesCache } from '../services/runestonesCache';
 import { getRunestonePopupHTML } from './RunestonePopup';
 
@@ -64,6 +64,8 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
   const mapRef = useRef<Map | null>(null);
   const moveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const currentPopupRef = useRef<Popup | null>(null);
+  const eventListenersAddedRef = useRef<boolean>(false);
+  const styleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [runestones, setRunestones] = useState<Runestone[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -141,7 +143,30 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     
     // Make sure the map style is loaded before adding layers
     if (!map.isStyleLoaded()) {
+      // Reset event listeners flag since style is changing
+      eventListenersAddedRef.current = false;
+      
+      // Clear any existing timeout to prevent multiple timeouts
+      if (styleTimeoutRef.current) {
+        clearTimeout(styleTimeoutRef.current);
+      }
+      
+      // Add timeout fallback in case styledata never fires (e.g., due to OpenFreeMap connectivity issues)
+      styleTimeoutRef.current = setTimeout(() => {
+        console.warn('Style loading timeout, attempting to add layers anyway');
+        styleTimeoutRef.current = null; // Clear the reference
+        if (mapRef.current && mapRef.current.isStyleLoaded()) {
+          updateClusters();
+        } else {
+          console.error('Style failed to load completely. Skipping layer addition to prevent infinite loop.');
+        }
+      }, 10000); // 10 second timeout
+      
       map.once('styledata', () => {
+        if (styleTimeoutRef.current) {
+          clearTimeout(styleTimeoutRef.current);
+          styleTimeoutRef.current = null;
+        }
         updateClusters();
       });
       return;
@@ -214,8 +239,8 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         filter: ['has', 'point_count'],
         layout: {
           'text-field': '{point_count_abbreviated}',
-          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
           'text-size': 12,
+          'text-font': ['Noto Sans Regular'],
         },
         paint: {
           'text-color': '#ffffff',
@@ -236,8 +261,10 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         },
       });
 
-      // Only add event listeners once
-      if (!map.listens('click')) {
+      // Add event listeners (only add once per component lifecycle)
+      if (!eventListenersAddedRef.current) {
+        eventListenersAddedRef.current = true;
+
         // Click event for clusters - zoom in
         map.on('click', 'clusters', (e) => {
           const features = map.queryRenderedFeatures(e.point, {
@@ -309,11 +336,12 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     const initMap = async () => {
       // Ensure cache is initialized before creating the map
       await runestonesCache.ensureCacheInitialized();
+      
       const map = new Map({
         container: mapContainer.current!,
         center: [18.0686, 59.4293], // Jarlabanke bridge
         zoom: 13,
-        style: 'https://openmaptiles.geo.data.gouv.fr/styles/osm-bright/style.json',
+        style: 'https://tiles.openfreemap.org/styles/bright',
       });
 
       mapRef.current = map;
@@ -359,6 +387,9 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     return () => {
       if (moveTimeoutRef.current) {
         clearTimeout(moveTimeoutRef.current);
+      }
+      if (styleTimeoutRef.current) {
+        clearTimeout(styleTimeoutRef.current);
       }
       closeCurrentPopup();
       if (mapRef.current) {
