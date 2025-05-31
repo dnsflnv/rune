@@ -136,87 +136,6 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     };
   }, []);
 
-  const addSimpleMarkers = useCallback(() => {
-    if (!mapRef.current || runestones.length === 0) return;
-
-    const map = mapRef.current;
-    console.log('Adding simple markers as fallback...');
-
-    // Remove existing simple markers
-    if ((map as any)._simpleMarkers) {
-      (map as any)._simpleMarkers.forEach((marker: Marker) => marker.remove());
-      (map as any)._simpleMarkers = [];
-    }
-
-    // Add simple markers (limited for performance)
-    const maxMarkers = 1000;
-    const stonesToShow = runestones.slice(0, maxMarkers);
-    const markers: Marker[] = [];
-    
-    stonesToShow.forEach((stone) => {
-      // Create marker
-      const marker = new Marker({ color: '#FF0000' })
-        .setLngLat([stone.longitude, stone.latitude]);
-
-      // Add click event to show popup
-      marker.getElement().addEventListener('click', () => {
-        const popupContent = `
-          <div class="p-4 max-w-sm">
-            <h3 class="font-bold text-xl mb-3 text-primary border-b border-gray-200 pb-2">${stone.signature_text}</h3>
-            
-            <div class="space-y-3">
-              <div>
-                <h4 class="font-semibold text-sm text-gray-700 mb-1">Location</h4>
-                <p class="text-sm text-gray-600">${stone.found_location}</p>
-                <p class="text-xs text-gray-500">${stone.parish}, ${stone.district}</p>
-              </div>
-              
-              <div>
-                <h4 class="font-semibold text-sm text-gray-700 mb-1">Details</h4>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                  <div><span class="font-medium">Material:</span> ${stone.material || 'Unknown'}</div>
-                  <div><span class="font-medium">Dating:</span> ${stone.dating || 'Unknown'}</div>
-                  <div><span class="font-medium">Type:</span> ${stone.rune_type || 'Unknown'}</div>
-                  <div><span class="font-medium">Style:</span> ${stone.style || 'Unknown'}</div>
-                </div>
-              </div>
-              
-              ${stone.english_translation ? `
-              <div>
-                <h4 class="font-semibold text-sm text-gray-700 mb-1">English Translation</h4>
-                <p class="text-sm text-gray-600 leading-relaxed">${stone.english_translation}</p>
-              </div>
-              ` : ''}
-              
-              ${stone.swedish_translation ? `
-              <div>
-                <h4 class="font-semibold text-sm text-gray-700 mb-1">Swedish Translation</h4>
-                <p class="text-sm text-gray-600 leading-relaxed">${stone.swedish_translation}</p>
-              </div>
-              ` : ''}
-              
-              ${stone.norse_text ? `
-              <div>
-                <h4 class="font-semibold text-sm text-gray-700 mb-1">Norse Text</h4>
-                <p class="text-sm text-gray-600 italic leading-relaxed">${stone.norse_text}</p>
-              </div>
-              ` : ''}
-            </div>
-          </div>
-        `;
-        
-        createPopup([stone.longitude, stone.latitude], popupContent).addTo(map);
-      });
-
-      marker.addTo(map);
-      markers.push(marker);
-    });
-
-    // Store markers for cleanup
-    (map as any)._simpleMarkers = markers;
-    console.log(`Added ${stonesToShow.length} simple markers (${runestones.length} total available)`);
-  }, [runestones, createPopup]);
-
   const updateClusters = useCallback(() => {
     if (!mapRef.current) return;
 
@@ -247,16 +166,11 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
       if (map.getSource('runestones')) {
         map.removeSource('runestones');
       }
-      // Remove simple markers if they exist
-      if ((map as any)._simpleMarkers) {
-        (map as any)._simpleMarkers.forEach((marker: Marker) => marker.remove());
-        (map as any)._simpleMarkers = [];
-      }
     } catch (error) {
       console.log('Error removing existing layers/sources:', error);
     }
 
-    // Try clustering approach first
+    // Create clustering approach
     const geoJsonData = createGeoJSONData(runestones);
     console.log('GeoJSON data sample:', geoJsonData.features.slice(0, 2));
 
@@ -438,11 +352,9 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
       }
 
     } catch (error) {
-      console.error('Error adding clustering layers, falling back to simple markers:', error);
-      // Fall back to simple markers
-      addSimpleMarkers();
+      console.error('Error adding clustering layers:', error);
     }
-  }, [runestones, createGeoJSONData, addSimpleMarkers, createPopup]);
+  }, [runestones, createGeoJSONData, createPopup]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
