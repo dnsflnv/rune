@@ -59,29 +59,57 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
   }, [fetchVisibleRunestones]);
 
   const createGeoJSONData = useCallback((stones: Runestone[]): RunestoneGeoJSON => {
+    // Check for and remove duplicates based on id
+    const uniqueStones = stones.filter((stone, index, arr) => 
+      arr.findIndex(s => s.id === stone.id) === index
+    );
+    
+    // Group stones by coordinates to handle overlapping locations
+    const coordinateGroups = uniqueStones.reduce((acc: Record<string, Runestone[]>, stone) => {
+      const coordKey = `${stone.longitude.toFixed(6)},${stone.latitude.toFixed(6)}`;
+      acc[coordKey] = acc[coordKey] || [];
+      acc[coordKey].push(stone);
+      return acc;
+    }, {});
+    
+    // Create features with slight offsets for overlapping stones
+    const features: RunestoneFeature[] = [];
+    Object.values(coordinateGroups).forEach(stonesAtLocation => {
+      stonesAtLocation.forEach((stone, index) => {
+        // Add small offset for overlapping stones (except the first one)
+        const offset = index * 0.00005; // Very small offset (~5.5 meters)
+        const offsetLng = stone.longitude + (index > 0 ? offset * Math.cos(index) : 0);
+        const offsetLat = stone.latitude + (index > 0 ? offset * Math.sin(index) : 0);
+        
+        features.push({
+          type: 'Feature',
+          properties: {
+            id: stone.id,
+            signature_text: stone.signature_text,
+            found_location: stone.found_location,
+            parish: stone.parish,
+            material: stone.material,
+            material_type: stone.material_type,
+            rune_type: stone.rune_type,
+            dating: stone.dating,
+            english_translation: stone.english_translation,
+            swedish_translation: stone.swedish_translation,
+            norse_text: stone.norse_text,
+            transliteration: stone.transliteration,
+            overlapping_count: stonesAtLocation.length,
+            original_coordinates: [stone.longitude, stone.latitude],
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: [offsetLng, offsetLat],
+          },
+        });
+      });
+    });
+    
     return {
       type: 'FeatureCollection',
-      features: stones.map((stone): RunestoneFeature => ({
-        type: 'Feature',
-        properties: {
-          id: stone.id,
-          signature_text: stone.signature_text,
-          found_location: stone.found_location,
-          parish: stone.parish,
-          material: stone.material,
-          material_type: stone.material_type,
-          rune_type: stone.rune_type,
-          dating: stone.dating,
-          english_translation: stone.english_translation,
-          swedish_translation: stone.swedish_translation,
-          norse_text: stone.norse_text,
-          transliteration: stone.transliteration,
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: [stone.longitude, stone.latitude],
-        },
-      })),
+      features,
     };
   }, []);
 
@@ -135,7 +163,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
       if (map.getSource('runestones')) {
         map.removeSource('runestones');
       }
-    } catch {
+    } catch (error) {
       // Silent error handling for layer/source removal
     }
 
@@ -143,6 +171,13 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     const geoJsonData = createGeoJSONData(runestones);
 
     try {
+      // Check if source already exists and try to update it first
+      const existingSource = map.getSource('runestones') as GeoJSONSource;
+      if (existingSource) {
+        existingSource.setData(geoJsonData);
+        return;
+      }
+      
       // Add source with clustering
       map.addSource('runestones', {
         type: 'geojson',
@@ -187,7 +222,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         source: 'runestones',
         filter: ['has', 'point_count'],
         layout: {
-          'text-field': '{point_count_abbreviated}',
+          'text-field': '{point_count}',
           'text-size': 12,
           'text-font': ['Noto Sans Regular'],
         },

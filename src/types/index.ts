@@ -38,6 +38,9 @@ export interface RunestoneFeature {
     swedish_translation?: string;
     norse_text?: string;
     transliteration?: string;
+    // Properties for handling overlapping runestones
+    overlapping_count?: number;
+    original_coordinates?: [number, number];
   };
   geometry: {
     type: 'Point';
