@@ -1,5 +1,6 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { sqliteService } from './sqliteService';
+import { Runestone } from '../types';
 
 interface RunestonesDB extends DBSchema {
     runestones: {
@@ -9,31 +10,6 @@ interface RunestonesDB extends DBSchema {
             'by-coordinates': [number, number];
         };
     };
-}
-
-interface Runestone {
-    id: number;
-    signature_text: string;
-    found_location: string;
-    parish: string;
-    district: string;
-    municipality: string;
-    current_location: string;
-    material: string;
-    material_type?: string;
-    rune_type: string;
-    dating: string;
-    style: string;
-    carver: string;
-    latitude: number;
-    longitude: number;
-    english_translation?: string;
-    swedish_translation?: string;
-    norse_text?: string;
-    transliteration?: string;
-    lost: boolean;
-    ornamental: boolean;
-    recent: boolean;
 }
 
 class RunestonesCache {
@@ -108,7 +84,7 @@ class RunestonesCache {
         }
         
         // Check if we have overlapping cached data for this specific region
-        for (const [_cachedKey, cachedBounds] of this.cachedBounds.entries()) {
+        for (const [, cachedBounds] of this.cachedBounds.entries()) {
             if (this.boundsOverlap(bounds, cachedBounds)) {
                 const allStones = await db.getAll('runestones');
                 return this.filterByBounds(allStones, bounds);

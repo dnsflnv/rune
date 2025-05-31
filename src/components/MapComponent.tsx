@@ -2,58 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { GeolocateControl, Map, Popup, GeoJSONSource } from 'maplibre-gl';
 import { runestonesCache } from '../services/runestonesCache';
 import { getRunestonePopupHTML } from './RunestonePopup';
-
-interface Runestone {
-  id: number;
-  signature_text: string;
-  found_location: string;
-  parish: string;
-  district: string;
-  municipality: string;
-  current_location: string;
-  material: string;
-  material_type?: string;
-  rune_type: string;
-  dating: string;
-  style: string;
-  carver: string;
-  latitude: number;
-  longitude: number;
-  english_translation?: string;
-  swedish_translation?: string;
-  norse_text?: string;
-  transliteration?: string;
-  lost: boolean;
-  ornamental: boolean;
-  recent: boolean;
-}
-
-interface RunestoneFeature {
-  type: 'Feature';
-  properties: {
-    id: number;
-    signature_text: string;
-    found_location: string;
-    parish: string;
-    material: string;
-    material_type?: string;
-    rune_type: string;
-    dating: string;
-    english_translation?: string;
-    swedish_translation?: string;
-    norse_text?: string;
-    transliteration?: string;
-  };
-  geometry: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
-}
-
-interface RunestoneGeoJSON {
-  type: 'FeatureCollection';
-  features: RunestoneFeature[];
-}
+import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
 
 interface MapComponentProps {
   onRunestoneCountChange?: (count: number) => void;
@@ -186,7 +135,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
       if (map.getSource('runestones')) {
         map.removeSource('runestones');
       }
-    } catch (error) {
+    } catch {
       // Silent error handling for layer/source removal
     }
 
@@ -275,12 +224,12 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           
           if (source && clusterId !== undefined) {
             source.getClusterExpansionZoom(clusterId).then((zoom: number) => {
-              const coordinates = (features[0].geometry as any).coordinates as [number, number];
+              const coordinates = (features[0].geometry as unknown as { coordinates: [number, number] }).coordinates;
               map.easeTo({
                 center: coordinates,
                 zoom: zoom,
               });
-            }).catch((err: any) => {
+            }).catch((err: Error) => {
               console.error('Error getting cluster expansion zoom:', err);
             });
           }
@@ -396,7 +345,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         mapRef.current.remove();
       }
     };
-  }, [debouncedFetchVisibleRunestones, fetchVisibleRunestones]);
+  }, [debouncedFetchVisibleRunestones, fetchVisibleRunestones, closeCurrentPopup]);
 
   // Update clusters when runestones change
   useEffect(() => {

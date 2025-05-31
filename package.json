@@ -13,12 +13,10 @@
     "node": ">=22.10.0 <23.0.0"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
     "idb": "^8.0.2",
     "maplibre-gl": "^5.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.1.5",
     "sql.js": "^1.12.0"
   },

@@ -1,29 +1,5 @@
 import initSqlJs, { Database } from 'sql.js';
-
-interface Runestone {
-  id: number;
-  signature_text: string;
-  found_location: string;
-  parish: string;
-  district: string;
-  municipality: string;
-  current_location: string;
-  material: string;
-  material_type?: string;
-  rune_type: string;
-  dating: string;
-  style: string;
-  carver: string;
-  latitude: number;
-  longitude: number;
-  english_translation?: string;
-  swedish_translation?: string;
-  norse_text?: string;
-  transliteration?: string;
-  lost: boolean;
-  ornamental: boolean;
-  recent: boolean;
-}
+import { Runestone } from '../types';
 
 class SQLiteService {
   private db: Database | null = null;
@@ -153,12 +129,6 @@ class SQLiteService {
       console.error('Error querying runestones:', error);
       throw error;
     }
-  }
-
-  // Keep the chunked method but make it more efficient
-  async getRunestonesChunked(bounds?: [number, number, number, number], _chunkSize: number = 1000): Promise<Runestone[]> {
-    // For now, just use the regular method since we added LIMIT
-    return this.getRunestones(bounds);
   }
 }
 
