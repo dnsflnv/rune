@@ -17,9 +17,7 @@ export const About = () => {
               <ul className="list-disc list-inside space-y-2">
                 <li>Interactive clustering map with 6,815+ runestones</li>
                 <li>High-performance SQLite database for fast data access</li>
-                <li>Responsive design that works on all devices</li>
                 <li>Detailed information about each runestone</li>
-                <li>Smart caching for optimal performance</li>
               </ul>
               
               <h2 className="text-xl font-semibold text-primary mt-8 mb-4">Technology Stack</h2>
@@ -29,21 +27,22 @@ export const About = () => {
                 <li>SQLite with sql.js for client-side database</li>
                 <li>Tailwind CSS for styling</li>
                 <li>Vite for fast development and building</li>
+                <li>Cursor AI with Anthropic Claude 4 as a code assistant</li>
               </ul>
-              
+
               <h2 className="text-xl font-semibold text-primary mt-8 mb-4">Data Sources</h2>
-              <p>
-                The runestone data is sourced from Swedish cultural heritage databases and 
-                archaeological records, providing accurate historical and geographical information 
-                about each artifact.
-              </p>
+              <ul className="list-disc list-inside space-y-2">
+                <li>Swedish National Heritage Board</li>
+                <li>OpenFreeMap for the map tiles</li>
+              </ul>
+
             </div>
           </div>
           
           <div className="bg-gray-50 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">
-                © 2025 Rune Explorer - Powered by SQLite
+                © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
               </div>
               <button
                 onClick={() => window.history.back()}
