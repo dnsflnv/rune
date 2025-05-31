@@ -46,7 +46,6 @@ class SQLiteService {
       // Create database instance
       this.db = new SQL.Database(uintArray);
       this.isInitialized = true;
-      console.log('SQLite database initialized successfully');
     } catch (error) {
       console.error('Failed to initialize SQLite database:', error);
       throw error;
@@ -150,7 +149,6 @@ class SQLiteService {
       
       stmt.free();
       const end = performance.now();
-      console.log(`SQLite query took ${(end - start).toFixed(2)}ms, returned ${runestones.length} runestones`);
       
       return runestones;
     } catch (error) {

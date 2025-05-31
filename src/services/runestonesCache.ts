@@ -77,17 +77,16 @@ class RunestonesCache {
         const db = await this.db;
         const key = this.boundsKey(bounds);
         
+        // Check if we already have overlapping cached data
         // Check if we have data for similar bounds
         for (const [_cachedKey, cachedBounds] of this.cachedBounds.entries()) {
             if (this.boundsOverlap(bounds, cachedBounds)) {
-                console.log('Using overlapping cached bounds');
                 const allStones = await db.getAll('runestones');
                 return this.filterByBounds(allStones, bounds);
             }
         }
 
         // If no cache hit, load from SQLite
-        console.log('No cache hit, loading from SQLite');
         const data = await sqliteService.getRunestones(bounds);
         await this.updateCache(data);
         this.cachedBounds.set(key, bounds);

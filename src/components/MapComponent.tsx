@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GeolocateControl, Map, Popup, GeoJSONSource, Marker } from 'maplibre-gl';
 import { runestonesCache } from '../services/runestonesCache';
+import { getRunestonePopupHTML } from './RunestonePopup';
 
 interface Runestone {
   id: number;
@@ -84,13 +85,10 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
   }, [closeCurrentPopup]);
 
   const fetchVisibleRunestones = useCallback(async (bounds: [number, number, number, number]) => {
-    console.log('fetchVisibleRunestones called with bounds:', bounds);
     setLoading(true);
     try {
       // Try to get data from cache first
       const cachedData = await runestonesCache.getRunestones(bounds);
-      console.log(`Loaded ${cachedData.length} runestones from cache/database`);
-      console.log('Sample runestone data:', cachedData.slice(0, 2));
       setRunestones(cachedData);
     } catch (error) {
       console.error('Error fetching runestones:', error);
@@ -143,14 +141,11 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     
     // Make sure the map style is loaded before adding layers
     if (!map.isStyleLoaded()) {
-      console.log('Map style not loaded yet, waiting...');
       map.once('styledata', () => {
         updateClusters();
       });
       return;
     }
-
-    console.log(`Updating with ${runestones.length} runestones`);
 
     // Remove existing layers and sources
     try {
@@ -167,12 +162,11 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         map.removeSource('runestones');
       }
     } catch (error) {
-      console.log('Error removing existing layers/sources:', error);
+      // Silent error handling for layer/source removal
     }
 
     // Create clustering approach
     const geoJsonData = createGeoJSONData(runestones);
-    console.log('GeoJSON data sample:', geoJsonData.features.slice(0, 2));
 
     try {
       // Add source with clustering
@@ -183,8 +177,6 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         clusterMaxZoom: 14, // Max zoom to cluster points on
         clusterRadius: 50, // Radius of each cluster when clustering points (defaults to 50)
       });
-
-      console.log('Added runestones source successfully');
 
       // Add cluster circles
       map.addLayer({
@@ -214,8 +206,6 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         },
       });
 
-      console.log('Added clusters layer successfully');
-
       // Add cluster count labels
       map.addLayer({
         id: 'cluster-count',
@@ -232,8 +222,6 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         },
       });
 
-      console.log('Added cluster-count layer successfully');
-
       // Add individual runestone points (unclustered)
       map.addLayer({
         id: 'unclustered-point',
@@ -247,8 +235,6 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           'circle-stroke-color': '#fff',
         },
       });
-
-      console.log('Added unclustered-point layer successfully');
 
       // Only add event listeners once
       if (!map.listens('click')) {
@@ -281,6 +267,10 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           const coordinates = feature.geometry.coordinates.slice() as [number, number];
           const properties = feature.properties!;
 
+          // Find the full runestone data using the id
+          const runestone = runestones.find(stone => stone.id === properties.id);
+          if (!runestone) return;
+
           // Ensure that if the map is zoomed out such that multiple
           // copies of the feature are visible, the popup appears
           // over the copy being pointed to.
@@ -288,50 +278,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
             coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
           }
 
-          const popupContent = `
-            <div class="p-4 max-w-sm">
-              <h3 class="font-bold text-xl mb-3 text-primary border-b border-gray-200 pb-2">${properties.signature_text}</h3>
-              
-              <div class="space-y-3">
-                <div>
-                  <h4 class="font-semibold text-sm text-gray-700 mb-1">Location</h4>
-                  <p class="text-sm text-gray-600">${properties.found_location}</p>
-                  <p class="text-xs text-gray-500">${properties.parish}</p>
-                </div>
-                
-                <div>
-                  <h4 class="font-semibold text-sm text-gray-700 mb-1">Details</h4>
-                  <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div><span class="font-medium">Material:</span> ${properties.material || 'Unknown'}</div>
-                    <div><span class="font-medium">Dating:</span> ${properties.dating || 'Unknown'}</div>
-                    <div><span class="font-medium">Type:</span> ${properties.rune_type || 'Unknown'}</div>
-                    <div><span class="font-medium">Style:</span> ${properties.material_type || 'Unknown'}</div>
-                  </div>
-                </div>
-                
-                ${properties.english_translation ? `
-                <div>
-                  <h4 class="font-semibold text-sm text-gray-700 mb-1">English Translation</h4>
-                  <p class="text-sm text-gray-600 leading-relaxed">${properties.english_translation}</p>
-                </div>
-                ` : ''}
-                
-                ${properties.swedish_translation ? `
-                <div>
-                  <h4 class="font-semibold text-sm text-gray-700 mb-1">Swedish Translation</h4>
-                  <p class="text-sm text-gray-600 leading-relaxed">${properties.swedish_translation}</p>
-                </div>
-                ` : ''}
-                
-                ${properties.norse_text ? `
-                <div>
-                  <h4 class="font-semibold text-sm text-gray-700 mb-1">Norse Text</h4>
-                  <p class="text-sm text-gray-600 italic leading-relaxed">${properties.norse_text}</p>
-                </div>
-                ` : ''}
-              </div>
-            </div>
-          `;
+          const popupContent = getRunestonePopupHTML(runestone);
 
           createPopup(coordinates, popupContent).addTo(map);
         });
@@ -381,7 +328,6 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           bounds.getEast() + 0.1,
           bounds.getNorth() + 0.1
         ];
-        console.log('Fetching runestones for initial load with bounds:', expandedBounds);
         fetchVisibleRunestones(expandedBounds);
       });
 
@@ -395,7 +341,6 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           bounds.getEast() + 0.1,
           bounds.getNorth() + 0.1
         ];
-        console.log('Map moved, debouncing fetch for bounds:', expandedBounds);
         debouncedFetchVisibleRunestones(expandedBounds);
       });
 
