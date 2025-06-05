@@ -1,7 +1,7 @@
 {
   "name": "rune",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "node": ">=22.10.0 <23.0.0"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.10",
     "idb": "^8.0.2",
     "maplibre-gl": "^5.1.0",
     "react": "^19.0.0",

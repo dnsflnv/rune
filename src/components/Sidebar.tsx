@@ -1,3 +1,5 @@
+import { AuthWidget } from './AuthWidget';
+
 interface MenuItem {
   key: string;
   label: string;
@@ -19,7 +21,7 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
         <h1 className="text-xl font-bold text-primary">Runestone Safari</h1>
         <p className="text-sm text-gray-600 mt-1">Explore Swedish heritage</p>
       </div>
-      
+
       {/* Navigation Menu */}
       <nav className="flex-1">
         <ul className="py-2">
@@ -38,14 +40,14 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
           ))}
         </ul>
       </nav>
-      
+
       {/* Runestone Count */}
       <div className="p-4 border-t border-gray-200">
         <div className="text-sm text-gray-600 text-center">
           <span className="font-medium text-primary">{runestoneCount}</span> visible runestones
         </div>
       </div>
-      
+
       {/* Map Legend */}
       <div className="p-4 border-t border-gray-200">
         <div className="text-xs font-medium text-gray-700 mb-3">Map Legend:</div>
@@ -68,7 +70,10 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
           </div>
         </div>
       </div>
-      
+
+      {/* Auth Widget */}
+      <AuthWidget />
+
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <div className="text-xs text-gray-500 text-center">
@@ -78,4 +83,4 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
       </div>
     </div>
   );
-}; 
+};
