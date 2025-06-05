@@ -5,9 +5,7 @@ import { Sidebar } from '../components/Sidebar';
 
 const menuItems = [
   { key: '1', label: 'Runestones', icon: '🗿' },
-  { key: '2', label: 'Mounds & burials', icon: '⛰️' },
-  { key: '3', label: 'Picturestones', icon: '🖼️' },
-  { key: '4', label: 'Bronze Age', icon: '🔶' },
+  { key: '2', label: 'About', icon: '💬' },
 ];
 
 export const Root = () => {
@@ -19,13 +17,13 @@ export const Root = () => {
       {/* Main layout container */}
       <div className="flex h-full">
         {/* Sidebar */}
-        <Sidebar 
+        <Sidebar
           activeItem={activeItem}
           setActiveItem={setActiveItem}
           runestoneCount={runestoneCount}
           menuItems={menuItems}
         />
-        
+
         {/* Main content area */}
         <div className="flex-1 relative">
           <MapComponent onRunestoneCountChange={setRunestoneCount} />
