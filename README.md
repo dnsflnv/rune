@@ -42,7 +42,7 @@ Runestone Safari is an interactive map application that allows you to explore Sw
 
 ## Acknowledgments
 
-- [Vadim Frolov](https://github.com/fralik) for [runes.sqlite3](https://github.com/fralik/rundata-net/blob/master/rundatanet/static/runes/runes.sqlite3)
+- [Vadim Frolov](https://github.com/fralik) and Sofia Pereswetoff-Morath for [runes.sqlite3](https://github.com/fralik/rundata-net/blob/master/rundatanet/static/runes/runes.sqlite3)
 
 ## License
 
