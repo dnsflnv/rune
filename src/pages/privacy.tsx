@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export const Privacy = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -65,6 +67,19 @@ export const Privacy = () => {
               </p>
 
               <p className="text-sm text-gray-500 mt-8">Last updated: {new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+          <div className="bg-gray-50 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
+              </div>
+              <Link
+                to="/"
+                className="inline-block px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 transition-colors"
+              >
+                ← Back to Home
+              </Link>
             </div>
           </div>
         </div>

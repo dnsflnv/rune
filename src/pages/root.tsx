@@ -3,10 +3,7 @@ import { useState } from 'react';
 import { MapComponent } from '../components/MapComponent';
 import { Sidebar } from '../components/Sidebar';
 
-const menuItems = [
-  { key: '1', label: 'Runestones', icon: '🗿' },
-  { key: '2', label: 'About', icon: '💬' },
-];
+const menuItems = [{ key: '1', label: 'Runestones', icon: '🗿' }];
 
 export const Root = () => {
   const [activeItem, setActiveItem] = useState('1');

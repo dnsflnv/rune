@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export const About = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -104,9 +106,12 @@ export const About = () => {
               <div className="text-sm text-gray-500">
                 © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
               </div>
-              <button onClick={() => window.history.back()} className="btn-primary text-sm">
-                ← Back to Map
-              </button>
+              <Link
+                to="/"
+                className="inline-block px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 transition-colors"
+              >
+                ← Back to Home
+              </Link>
             </div>
           </div>
         </div>
