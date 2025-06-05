@@ -1,8 +1,14 @@
 import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-import readmeContent from '../../README.md?raw';
+import licenseContent from '../../LICENSE.md?raw';
 
-export const About = () => {
+interface CodeProps {
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export const License = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
@@ -16,18 +22,22 @@ export const About = () => {
                     <h2 className="text-xl font-semibold text-primary mt-8 mb-4" {...props} />
                   ),
                   a: ({ node, ...props }) => <a className="text-primary hover:underline" {...props} />,
-                  code: ({ node, inline, ...props }) =>
+                  code: ({ inline, className, children, ...props }: CodeProps) =>
                     inline ? (
-                      <code className="bg-gray-100 rounded px-1 py-0.5" {...props} />
+                      <code className="bg-gray-100 rounded px-1 py-0.5" {...props}>
+                        {children}
+                      </code>
                     ) : (
-                      <code className="block bg-gray-100 rounded p-4 my-4 overflow-x-auto" {...props} />
+                      <code className="block bg-gray-100 rounded p-4 my-4 overflow-x-auto" {...props}>
+                        {children}
+                      </code>
                     ),
                   ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-2" {...props} />,
                   li: ({ node, ...props }) => <li className="text-gray-700" {...props} />,
                   p: ({ node, ...props }) => <p className="text-gray-700" {...props} />,
                 }}
               >
-                {readmeContent}
+                {licenseContent}
               </ReactMarkdown>
             </div>
           </div>

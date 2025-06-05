@@ -1,4 +1,4 @@
-import { AuthWidget } from './AuthWidget';
+// import { AuthWidget } from './AuthWidget';
 
 interface MenuItem {
   key: string;
@@ -72,28 +72,26 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
       </div>
 
       {/* Auth Widget */}
-      <AuthWidget />
+      {/* <AuthWidget /> */}
 
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <div className="text-xs text-gray-500 text-center">
-          <ul>
-            <li>
-              <a href="/about" className="underline">
-                About
-              </a>
-            </li>
-            <li className="mt-1">
-              <a href="/privacy" className="underline">
-                Privacy Policy
-              </a>
-            </li>
-            <li>
-              <a href="https://github.com/dnsflnv/rune" className="underline">
-                GitHub
-              </a>
-            </li>
-          </ul>
+          <a href="/about" className="underline">
+            About
+          </a>
+          {' • '}
+          <a href="/privacy" className="underline">
+            Privacy Policy
+          </a>
+          {' • '}
+          <a href="/license" className="underline">
+            License
+          </a>
+          {' • '}
+          <a href="https://github.com/dnsflnv/rune" className="underline">
+            GitHub
+          </a>
           <p className="mt-1">© 2025 Denis Filonov</p>
         </div>
       </div>

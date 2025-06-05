@@ -6,6 +6,7 @@ import { Root } from './pages/root';
 import ErrorPage from './error-page';
 import { About } from './pages/about';
 import { Privacy } from './pages/privacy';
+import { License } from './pages/license';
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,11 @@ const router = createBrowserRouter([
   {
     path: '/privacy',
     element: <Privacy />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: '/license',
+    element: <License />,
     errorElement: <ErrorPage />,
   },
 ]);
