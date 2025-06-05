@@ -77,8 +77,24 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <div className="text-xs text-gray-500 text-center">
-          <p>Powered by SQLite, Vite, TypeScript, React, Maplibre, and Tailwind</p>
-          <p className="mt-1">© 2025 Rune Explorer</p>
+          <ul>
+            <li>
+              <a href="/about" className="underline">
+                About
+              </a>
+            </li>
+            <li className="mt-1">
+              <a href="/privacy" className="underline">
+                Privacy Policy
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/dnsflnv/rune" className="underline">
+                GitHub
+              </a>
+            </li>
+          </ul>
+          <p className="mt-1">© 2025 Denis Filonov</p>
         </div>
       </div>
     </div>
