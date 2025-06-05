@@ -69,8 +69,18 @@ class RunestonesCache {
     return !(east1 < west2 || west1 > east2 || north1 < south2 || south1 > north2);
   }
 
+  private isCacheExpired(): boolean {
+    return Date.now() - this.lastUpdate > this.CACHE_DURATION;
+  }
+
   async getRunestones(bounds: [number, number, number, number]): Promise<Runestone[]> {
     await this.initializeCache(); // Ensure cache is initialized
+
+    // Check if cache is expired
+    if (this.isCacheExpired()) {
+      await this.clearCache();
+      await this.initializeCache();
+    }
 
     const db = await this.db;
     const key = this.boundsKey(bounds);
