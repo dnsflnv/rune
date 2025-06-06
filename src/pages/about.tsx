@@ -16,12 +16,7 @@ export const About = () => {
                     <h2 className="text-xl font-semibold text-primary mt-8 mb-4" {...props} />
                   ),
                   a: ({ node, ...props }) => <a className="text-primary hover:underline" {...props} />,
-                  code: ({ node, inline, ...props }) =>
-                    inline ? (
-                      <code className="bg-gray-100 rounded px-1 py-0.5" {...props} />
-                    ) : (
-                      <code className="block bg-gray-100 rounded p-4 my-4 overflow-x-auto" {...props} />
-                    ),
+                  code: ({ node, ...props }) => <code className="bg-gray-100 rounded px-1 py-0.5" {...props} />,
                   ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-2" {...props} />,
                   li: ({ node, ...props }) => <li className="text-gray-700" {...props} />,
                   p: ({ node, ...props }) => <p className="text-gray-700" {...props} />,
