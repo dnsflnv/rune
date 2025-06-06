@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
           main: resolve(__dirname, 'index.html'),
         },
         output: {
-          format: 'es',
+          format: 'esm',
         },
       },
       // rollupOptions: {
