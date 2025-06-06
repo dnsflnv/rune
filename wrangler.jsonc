@@ -2,6 +2,9 @@
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "rune",
     "compatibility_date": "2025-06-06",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
     "assets": {
         "not_found_handling": "single-page-application",
     },
