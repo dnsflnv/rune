@@ -17,12 +17,10 @@ export const License = () => {
             <div className="prose prose-lg max-w-none">
               <ReactMarkdown
                 components={{
-                  h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-primary mb-6" {...props} />,
-                  h2: ({ node, ...props }) => (
-                    <h2 className="text-xl font-semibold text-primary mt-8 mb-4" {...props} />
-                  ),
-                  a: ({ node, ...props }) => <a className="text-primary hover:underline" {...props} />,
-                  code: ({ inline, className, children, ...props }: CodeProps) =>
+                  h1: ({ ...props }) => <h1 className="text-3xl font-bold text-primary mb-6" {...props} />,
+                  h2: ({ ...props }) => <h2 className="text-xl font-semibold text-primary mt-8 mb-4" {...props} />,
+                  a: ({ ...props }) => <a className="text-primary hover:underline" {...props} />,
+                  code: ({ inline, children, ...props }: CodeProps) =>
                     inline ? (
                       <code className="bg-gray-100 rounded px-1 py-0.5" {...props}>
                         {children}
@@ -32,9 +30,9 @@ export const License = () => {
                         {children}
                       </code>
                     ),
-                  ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-2" {...props} />,
-                  li: ({ node, ...props }) => <li className="text-gray-700" {...props} />,
-                  p: ({ node, ...props }) => <p className="text-gray-700" {...props} />,
+                  ul: ({ ...props }) => <ul className="list-disc list-inside space-y-2" {...props} />,
+                  li: ({ ...props }) => <li className="text-gray-700" {...props} />,
+                  p: ({ ...props }) => <p className="text-gray-700" {...props} />,
                 }}
               >
                 {licenseContent}
