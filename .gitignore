@@ -33,3 +33,7 @@ pgdata
 .devbox
 logfile
 .env
+
+# Cloudflare
+.wrangler
+.dev.vars*

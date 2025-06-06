@@ -1,11 +1,7 @@
 {
-    "$schema": "node_modules/wrangler/config-schema.json",
     "name": "rune",
-    "compatibility_date": "2025-06-06",
-    "compatibility_flags": [
-        "nodejs_compat"
-    ],
+    "compatibility_date": "2025-05-05",
     "assets": {
-        "not_found_handling": "single-page-application",
-    },
+        "not_found_handling": "single-page-application"
+    }
 }
