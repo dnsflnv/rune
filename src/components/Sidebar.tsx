@@ -1,4 +1,4 @@
-// import { AuthWidget } from './AuthWidget';
+import { AuthWidget } from './AuthWidget';
 
 interface MenuItem {
   key: string;
@@ -72,7 +72,7 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
       </div>
 
       {/* Auth Widget */}
-      {/* <AuthWidget /> */}
+      <AuthWidget />
 
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
