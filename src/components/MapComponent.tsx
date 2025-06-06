@@ -25,15 +25,16 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     }
   }, []);
 
-  const createPopup = useCallback((coordinates: [number, number], htmlContent: string) => {
-    closeCurrentPopup();
-    const popup = new Popup({ closeButton: true, closeOnClick: false })
-      .setLngLat(coordinates)
-      .setHTML(htmlContent);
-    
-    currentPopupRef.current = popup;
-    return popup;
-  }, [closeCurrentPopup]);
+  const createPopup = useCallback(
+    (coordinates: [number, number], htmlContent: string) => {
+      closeCurrentPopup();
+      const popup = new Popup({ closeButton: true, closeOnClick: false }).setLngLat(coordinates).setHTML(htmlContent);
+
+      currentPopupRef.current = popup;
+      return popup;
+    },
+    [closeCurrentPopup]
+  );
 
   const fetchVisibleRunestones = useCallback(async (bounds: [number, number, number, number]) => {
     setLoading(true);
@@ -48,22 +49,23 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     }
   }, []);
 
-  const debouncedFetchVisibleRunestones = useCallback((bounds: [number, number, number, number]) => {
-    if (moveTimeoutRef.current) {
-      clearTimeout(moveTimeoutRef.current);
-    }
-    
-    moveTimeoutRef.current = setTimeout(() => {
-      fetchVisibleRunestones(bounds);
-    }, 300); // 300ms debounce
-  }, [fetchVisibleRunestones]);
+  const debouncedFetchVisibleRunestones = useCallback(
+    (bounds: [number, number, number, number]) => {
+      if (moveTimeoutRef.current) {
+        clearTimeout(moveTimeoutRef.current);
+      }
+
+      moveTimeoutRef.current = setTimeout(() => {
+        fetchVisibleRunestones(bounds);
+      }, 300); // 300ms debounce
+    },
+    [fetchVisibleRunestones]
+  );
 
   const createGeoJSONData = useCallback((stones: Runestone[]): RunestoneGeoJSON => {
     // Check for and remove duplicates based on id
-    const uniqueStones = stones.filter((stone, index, arr) => 
-      arr.findIndex(s => s.id === stone.id) === index
-    );
-    
+    const uniqueStones = stones.filter((stone, index, arr) => arr.findIndex((s) => s.id === stone.id) === index);
+
     // Group stones by coordinates to handle overlapping locations
     const coordinateGroups = uniqueStones.reduce((acc: Record<string, Runestone[]>, stone) => {
       const coordKey = `${stone.longitude.toFixed(6)},${stone.latitude.toFixed(6)}`;
@@ -71,16 +73,16 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
       acc[coordKey].push(stone);
       return acc;
     }, {});
-    
+
     // Create features with slight offsets for overlapping stones
     const features: RunestoneFeature[] = [];
-    Object.values(coordinateGroups).forEach(stonesAtLocation => {
+    Object.values(coordinateGroups).forEach((stonesAtLocation) => {
       stonesAtLocation.forEach((stone, index) => {
         // Add small offset for overlapping stones (except the first one)
         const offset = index * 0.00005; // Very small offset (~5.5 meters)
         const offsetLng = stone.longitude + (index > 0 ? offset * Math.cos(index) : 0);
         const offsetLat = stone.latitude + (index > 0 ? offset * Math.sin(index) : 0);
-        
+
         features.push({
           type: 'Feature',
           properties: {
@@ -106,7 +108,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         });
       });
     });
-    
+
     return {
       type: 'FeatureCollection',
       features,
@@ -117,17 +119,17 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     if (!mapRef.current) return;
 
     const map = mapRef.current;
-    
+
     // Make sure the map style is loaded before adding layers
     if (!map.isStyleLoaded()) {
       // Reset event listeners flag since style is changing
       eventListenersAddedRef.current = false;
-      
+
       // Clear any existing timeout to prevent multiple timeouts
       if (styleTimeoutRef.current) {
         clearTimeout(styleTimeoutRef.current);
       }
-      
+
       // Add timeout fallback in case styledata never fires (e.g., due to OpenFreeMap connectivity issues)
       styleTimeoutRef.current = setTimeout(() => {
         console.warn('Style loading timeout, attempting to add layers anyway');
@@ -138,7 +140,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           console.error('Style failed to load completely. Skipping layer addition to prevent infinite loop.');
         }
       }, 10000); // 10 second timeout
-      
+
       map.once('styledata', () => {
         if (styleTimeoutRef.current) {
           clearTimeout(styleTimeoutRef.current);
@@ -164,7 +166,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         map.removeSource('runestones');
       }
     } catch (error) {
-      // Silent error handling for layer/source removal
+      console.error('Error removing layers:', error);
     }
 
     // Create clustering approach
@@ -177,7 +179,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         existingSource.setData(geoJsonData);
         return;
       }
-      
+
       // Add source with clustering
       map.addSource('runestones', {
         type: 'geojson',
@@ -256,17 +258,20 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           });
           const clusterId = features[0].properties?.cluster_id;
           const source = map.getSource('runestones') as GeoJSONSource;
-          
+
           if (source && clusterId !== undefined) {
-            source.getClusterExpansionZoom(clusterId).then((zoom: number) => {
-              const coordinates = (features[0].geometry as unknown as { coordinates: [number, number] }).coordinates;
-              map.easeTo({
-                center: coordinates,
-                zoom: zoom,
+            source
+              .getClusterExpansionZoom(clusterId)
+              .then((zoom: number) => {
+                const coordinates = (features[0].geometry as unknown as { coordinates: [number, number] }).coordinates;
+                map.easeTo({
+                  center: coordinates,
+                  zoom: zoom,
+                });
+              })
+              .catch((err: Error) => {
+                console.error('Error getting cluster expansion zoom:', err);
               });
-            }).catch((err: Error) => {
-              console.error('Error getting cluster expansion zoom:', err);
-            });
           }
         });
 
@@ -274,12 +279,12 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         map.on('click', 'unclustered-point', (e) => {
           const feature = e.features?.[0];
           if (!feature || !feature.geometry || feature.geometry.type !== 'Point') return;
-          
+
           const coordinates = feature.geometry.coordinates.slice() as [number, number];
           const properties = feature.properties!;
 
           // Find the full runestone data using the id
-          const runestone = runestones.find(stone => stone.id === properties.id);
+          const runestone = runestones.find((stone) => stone.id === properties.id);
           if (!runestone) return;
 
           // Ensure that if the map is zoomed out such that multiple
@@ -308,7 +313,6 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           map.getCanvas().style.cursor = '';
         });
       }
-
     } catch (error) {
       console.error('Error adding clustering layers:', error);
     }
@@ -320,7 +324,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     const initMap = async () => {
       // Ensure cache is initialized before creating the map
       await runestonesCache.ensureCacheInitialized();
-      
+
       const map = new Map({
         container: mapContainer.current!,
         center: [18.0686, 59.4293], // Jarlabanke bridge
@@ -338,7 +342,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           bounds.getWest() - 0.1, // Smaller expansion (~11km)
           bounds.getSouth() - 0.1,
           bounds.getEast() + 0.1,
-          bounds.getNorth() + 0.1
+          bounds.getNorth() + 0.1,
         ];
         fetchVisibleRunestones(expandedBounds);
       });
@@ -351,7 +355,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           bounds.getWest() - 0.1,
           bounds.getSouth() - 0.1,
           bounds.getEast() + 0.1,
-          bounds.getNorth() + 0.1
+          bounds.getNorth() + 0.1,
         ];
         debouncedFetchVisibleRunestones(expandedBounds);
       });
@@ -389,7 +393,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
       const timer = setTimeout(() => {
         updateClusters();
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [updateClusters, runestones.length]);
@@ -403,7 +407,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
   return (
     <div className="relative w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
-      
+
       {/* Loading indicator */}
       {loading && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg shadow-lg z-[1001]">

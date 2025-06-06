@@ -43,7 +43,7 @@ class RunestonesCache {
     if (existingData === 0) {
       try {
         // Load all runestones from Supabase without bounds restriction
-        const allRunestones = await supabaseRunestones.getRunestones();
+        const allRunestones = await supabaseRunestones.getAllRunestones();
         await this.updateCache(allRunestones);
 
         // Mark that we have all data cached by setting a special bounds entry
@@ -99,7 +99,7 @@ class RunestonesCache {
       }
     }
     // If no cache hit, load from Supabase
-    const data = await supabaseRunestones.getRunestones(
+    const data = await supabaseRunestones.getVisibleRunestones(
       bounds[0], // west
       bounds[1], // south
       bounds[2], // east
