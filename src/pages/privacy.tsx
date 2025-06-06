@@ -61,8 +61,8 @@ export const Privacy = () => {
               <p>
                 If you have any questions about this Privacy Policy, please contact us at:
                 <br />
-                <a href="mailto:privacy@runestone-safari.com" className="text-primary hover:underline">
-                  privacy@runestone-safari.com
+                <a href="mailto:privacy.runestonesafari.1atjf@simplelogin.com" className="text-primary hover:underline">
+                  privacy.runestonesafari.1atjf@simplelogin.com
                 </a>
               </p>
 
