@@ -1,6 +1,7 @@
 import { Runestone } from '../types';
 import { supabaseRunestones } from '../services/supabaseRunestones';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { authService } from '../services/auth';
 
 interface RunestoneModalProps {
   runestone: Runestone | null;
@@ -14,17 +15,10 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
   const [visitedError, setVisitedError] = useState<string | null>(null);
   const [isVisited, setIsVisited] = useState(false);
   const [isCheckingVisited, setIsCheckingVisited] = useState(false);
+  const [authUser, setAuthUser] = useState(() => authService.getUser());
 
-  // Check if runestone is visited when modal opens
-  useEffect(() => {
-    if (isOpen && runestone) {
-      checkVisitedStatus();
-    }
-  }, [isOpen, runestone]);
-
-  const checkVisitedStatus = async () => {
+  const checkVisitedStatus = useCallback(async () => {
     if (!runestone) return;
-
     setIsCheckingVisited(true);
     try {
       const visited = await supabaseRunestones.isVisited(runestone.id);
@@ -35,7 +29,21 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
     } finally {
       setIsCheckingVisited(false);
     }
-  };
+  }, [runestone]);
+
+  useEffect(() => {
+    if (isOpen && runestone) {
+      checkVisitedStatus();
+    }
+  }, [isOpen, runestone, checkVisitedStatus]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newUser = authService.getUser();
+      setAuthUser((prev) => (prev !== newUser ? newUser : prev));
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   // If modal is not open or no runestone, don't render anything
   if (!isOpen || !runestone) {
@@ -193,7 +201,7 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
           </div>
 
           {/* Error Message */}
-          {visitedError && (
+          {authUser && visitedError && (
             <div className="px-4 pb-2">
               <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{visitedError}</p>
             </div>
@@ -201,29 +209,32 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
 
           {/* Footer */}
           <div className="flex justify-between items-center p-4 border-t border-gray-200">
-            <button
-              onClick={handleMarkAsVisited}
-              disabled={isMarkingVisited || isCheckingVisited}
-              className={`px-4 py-2 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${
-                isVisited ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
-              }`}
-            >
-              {isMarkingVisited ? (
-                <>
-                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  <span>{isVisited ? 'Unmarking...' : 'Marking...'}</span>
-                </>
-              ) : isCheckingVisited ? (
-                <>
-                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  <span>Checking...</span>
-                </>
-              ) : (
-                <>
-                  <span>{isVisited ? 'Unmark as Visited' : 'Mark as Visited'}</span>
-                </>
-              )}
-            </button>
+            {/* Mark as Visited Button - only show if user is logged in */}
+            {authUser && (
+              <button
+                onClick={handleMarkAsVisited}
+                disabled={isMarkingVisited || isCheckingVisited}
+                className={`px-4 py-2 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${
+                  isVisited ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+                }`}
+              >
+                {isMarkingVisited ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                    <span>{isVisited ? 'Unmarking...' : 'Marking...'}</span>
+                  </>
+                ) : isCheckingVisited ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                    <span>Checking...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{isVisited ? 'Unmark as Visited' : 'Mark as Visited'}</span>
+                  </>
+                )}
+              </button>
+            )}
 
             <button onClick={onClose} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
               Close

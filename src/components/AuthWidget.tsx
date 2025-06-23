@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { authService } from '../services/auth';
 
 export const AuthWidget = () => {
@@ -10,9 +10,18 @@ export const AuthWidget = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [authUser, setAuthUser] = useState(() => authService.getUser());
+  const [authLoading, setAuthLoading] = useState(() => authService.isLoading());
 
-  const user = authService.getUser();
-  const isLoading = authService.isLoading();
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newUser = authService.getUser();
+      const newLoading = authService.isLoading();
+      setAuthUser((prev) => (prev !== newUser ? newUser : prev));
+      setAuthLoading((prev) => (prev !== newLoading ? newLoading : prev));
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,15 +83,15 @@ export const AuthWidget = () => {
     }
   };
 
-  if (isLoading) {
+  if (authLoading) {
     return <div className="p-4 text-sm text-gray-500">Loading...</div>;
   }
 
-  if (user) {
+  if (authUser) {
     return (
       <div className="p-4 border-t border-gray-200">
         <div className="text-sm text-gray-600 mb-2">
-          Signed in as <span className="font-medium">{user.email}</span>
+          Signed in as <span className="font-medium">{authUser.email}</span>
         </div>
         <button
           onClick={handleSignOut}
