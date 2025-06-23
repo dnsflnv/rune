@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { GeolocateControl, Map, Popup, GeoJSONSource } from 'maplibre-gl';
+import { GeolocateControl, Map, GeoJSONSource } from 'maplibre-gl';
 import { runestonesCache } from '../services/runestonesCache';
-import { getRunestonePopupHTML } from './RunestonePopup';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
 
 interface MapComponentProps {
@@ -12,29 +11,10 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const moveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const currentPopupRef = useRef<Popup | null>(null);
   const eventListenersAddedRef = useRef<boolean>(false);
   const styleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [runestones, setRunestones] = useState<Runestone[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const closeCurrentPopup = useCallback(() => {
-    if (currentPopupRef.current) {
-      currentPopupRef.current.remove();
-      currentPopupRef.current = null;
-    }
-  }, []);
-
-  const createPopup = useCallback(
-    (coordinates: [number, number], htmlContent: string) => {
-      closeCurrentPopup();
-      const popup = new Popup({ closeButton: true, closeOnClick: false }).setLngLat(coordinates).setHTML(htmlContent);
-
-      currentPopupRef.current = popup;
-      return popup;
-    },
-    [closeCurrentPopup]
-  );
 
   const fetchVisibleRunestones = useCallback(async (bounds: [number, number, number, number]) => {
     setLoading(true);
@@ -275,30 +255,6 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           }
         });
 
-        // Click event for individual runestones - show popup
-        map.on('click', 'unclustered-point', (e) => {
-          const feature = e.features?.[0];
-          if (!feature || !feature.geometry || feature.geometry.type !== 'Point') return;
-
-          const coordinates = feature.geometry.coordinates.slice() as [number, number];
-          const properties = feature.properties!;
-
-          // Find the full runestone data using the id
-          const runestone = runestones.find((stone) => stone.id === properties.id);
-          if (!runestone) return;
-
-          // Ensure that if the map is zoomed out such that multiple
-          // copies of the feature are visible, the popup appears
-          // over the copy being pointed to.
-          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-          }
-
-          const popupContent = getRunestonePopupHTML(runestone);
-
-          createPopup(coordinates, popupContent).addTo(map);
-        });
-
         // Change cursor to pointer when hovering over clusters or points
         map.on('mouseenter', 'clusters', () => {
           map.getCanvas().style.cursor = 'pointer';
@@ -316,7 +272,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
     } catch (error) {
       console.error('Error adding clustering layers:', error);
     }
-  }, [runestones, createGeoJSONData, createPopup]);
+  }, [runestones, createGeoJSONData]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -379,12 +335,11 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
       if (styleTimeoutRef.current) {
         clearTimeout(styleTimeoutRef.current);
       }
-      closeCurrentPopup();
       if (mapRef.current) {
         mapRef.current.remove();
       }
     };
-  }, [debouncedFetchVisibleRunestones, fetchVisibleRunestones, closeCurrentPopup]);
+  }, [debouncedFetchVisibleRunestones, fetchVisibleRunestones]);
 
   // Update clusters when runestones change
   useEffect(() => {
