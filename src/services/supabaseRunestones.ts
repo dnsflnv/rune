@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { Runestone } from '../types';
+import { authService } from './auth';
 
 class SupabaseRunestonesService {
   private static instance: SupabaseRunestonesService;
@@ -92,6 +93,30 @@ class SupabaseRunestonesService {
       ornamental: Boolean(row.ornamental),
       recent: Boolean(row.recent),
     }));
+  }
+
+  async markAsVisited(runestoneId: number): Promise<void> {
+
+    const { error } = await supabase.schema('rune').from('visited').insert({
+      signature_id: runestoneId,
+      user_id: authService.getUser()?.id,
+    });
+
+    if (error) {
+      console.error('Error marking runestone as visited:', error);
+      throw error;
+    }
+  }
+
+  async isVisited(runestoneId: number): Promise<boolean> {
+    const { data, error } = await supabase.schema('rune').from('visited').select('*').eq('signature_id', runestoneId).eq('user_id', authService.getUser()?.id);
+
+    if (error) {
+      console.error('Error checking if runestone is visited:', error);
+      throw error;
+    }
+
+    return data?.length > 0;
   }
 }
 
