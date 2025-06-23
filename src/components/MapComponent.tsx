@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { GeolocateControl, Map, GeoJSONSource } from 'maplibre-gl';
 import { runestonesCache } from '../services/runestonesCache';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
+import { RunestoneModal } from './RunestoneModal';
 
 interface MapComponentProps {
   onRunestoneCountChange?: (count: number) => void;
@@ -15,6 +16,22 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
   const styleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [runestones, setRunestones] = useState<Runestone[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Modal state
+  const [selectedRunestone, setSelectedRunestone] = useState<Runestone | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Function to open modal with a runestone
+  const openModal = (runestone: Runestone) => {
+    setSelectedRunestone(runestone);
+    setIsModalOpen(true);
+  };
+
+  // Function to close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedRunestone(null);
+  };
 
   const fetchVisibleRunestones = useCallback(async (bounds: [number, number, number, number]) => {
     setLoading(true);
@@ -255,6 +272,21 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           }
         });
 
+        // Click event for individual runestones - open modal
+        map.on('click', 'unclustered-point', (e) => {
+          const feature = e.features?.[0];
+          if (!feature || !feature.geometry || feature.geometry.type !== 'Point') return;
+
+          const properties = feature.properties!;
+
+          // Find the full runestone data using the id
+          const runestone = runestones.find((stone) => stone.id === properties.id);
+          if (!runestone) return;
+
+          // Open the modal with this runestone
+          openModal(runestone);
+        });
+
         // Change cursor to pointer when hovering over clusters or points
         map.on('mouseenter', 'clusters', () => {
           map.getCanvas().style.cursor = 'pointer';
@@ -372,6 +404,13 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           </div>
         </div>
       )}
+
+      {/* Runestone Modal */}
+      <RunestoneModal 
+        runestone={selectedRunestone}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      />
     </div>
   );
 };

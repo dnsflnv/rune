@@ -3,7 +3,6 @@ import { AuthWidget } from './AuthWidget';
 interface MenuItem {
   key: string;
   label: string;
-  icon: string;
 }
 
 interface SidebarProps {
@@ -33,7 +32,6 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
                   activeItem === item.key ? 'active' : ''
                 }`}
               >
-                <span className="text-lg">{item.icon}</span>
                 <span className="text-sm font-medium">{item.label}</span>
               </button>
             </li>

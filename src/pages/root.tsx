@@ -4,8 +4,8 @@ import { MapComponent } from '../components/MapComponent';
 import { Sidebar } from '../components/Sidebar';
 
 const menuItems = [
-  { key: '1', label: 'All Runestones', icon: '🗿' },
-  { key: '2', label: 'Visited Runestones', icon: '🗿' },
+  { key: '1', label: 'All Runestones' },
+  { key: '2', label: 'Visited Runestones' },
 ];
 
 export const Root = () => {
