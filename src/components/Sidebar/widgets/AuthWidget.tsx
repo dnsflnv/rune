@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { authService } from '../services/auth';
+import { authService } from '../../../services/auth';
 
 export const AuthWidget = () => {
   const [isSignUp, setIsSignUp] = useState(false);
