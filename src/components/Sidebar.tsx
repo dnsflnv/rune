@@ -34,7 +34,7 @@ export const Sidebar = ({
   return (
     <aside
       className={`
-        fixed z-30 top-0 left-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col
+        fixed z-30 top-0 left-0 h-full min-h-0 w-64 bg-white border-r border-gray-200 flex flex-col
         transition-transform duration-200 ease-in-out
         ${visible ? 'translate-x-0' : '-translate-x-full'}
         md:static md:translate-x-0 md:block
@@ -58,8 +58,8 @@ export const Sidebar = ({
         <h1 className="text-xl font-bold text-primary">Runestone Safari β</h1>
         <p className="text-sm text-gray-600 mt-1">Explore Swedish heritage</p>
       </div>
-      {/* Navigation Menu */}
-      <nav className="flex-1">
+      {/* Navigation Menu (flex-1) */}
+      <nav className="flex-1 min-h-0 overflow-y-auto">
         <ul className="py-2">
           {menuItems.map((item) => (
             <li key={item.key}>
@@ -78,14 +78,12 @@ export const Sidebar = ({
           ))}
         </ul>
       </nav>
-
       {/* Visited Runestone Count */}
       <div className="p-4 border-t border-gray-200">
         <div className="text-sm text-gray-600 text-center">
           <span className="font-medium text-primary">{visitedCount}</span> visited runestones
         </div>
       </div>
-
       {/* Map Legend */}
       <div className="p-4 border-t border-gray-200">
         <div className="text-xs font-medium text-gray-700 mb-3">Map Legend:</div>
@@ -112,10 +110,8 @@ export const Sidebar = ({
           </div>
         </div>
       </div>
-
       {/* Auth Widget */}
       <AuthWidget />
-
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <div className="text-xs text-gray-500 text-center">

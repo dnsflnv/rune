@@ -14,7 +14,7 @@ export const Root = () => {
   // Sidebar is controlled by sidebarOpen on mobile
 
   return (
-    <div className="h-screen bg-gray-50">
+    <div className="min-h-screen h-screen bg-gray-50">
       {/* Hamburger button for mobile */}
       <button
         className="absolute top-4 left-4 z-30 md:hidden bg-white border border-gray-300 rounded p-2 shadow"
