@@ -1,6 +1,6 @@
 import { Runestone } from '../types';
 import { supabaseRunestones } from '../services/supabaseRunestones';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface RunestoneModalProps {
   runestone: Runestone | null;
@@ -11,6 +11,30 @@ interface RunestoneModalProps {
 export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalProps) => {
   const [isMarkingVisited, setIsMarkingVisited] = useState(false);
   const [visitedError, setVisitedError] = useState<string | null>(null);
+  const [isVisited, setIsVisited] = useState(false);
+  const [isCheckingVisited, setIsCheckingVisited] = useState(false);
+
+  // Check if runestone is visited when modal opens
+  useEffect(() => {
+    if (isOpen && runestone) {
+      checkVisitedStatus();
+    }
+  }, [isOpen, runestone]);
+
+  const checkVisitedStatus = async () => {
+    if (!runestone) return;
+
+    setIsCheckingVisited(true);
+    try {
+      const visited = await supabaseRunestones.isVisited(runestone.id);
+      setIsVisited(visited);
+    } catch (error) {
+      console.error('Error checking visited status:', error);
+      setVisitedError('Failed to check visited status.');
+    } finally {
+      setIsCheckingVisited(false);
+    }
+  };
 
   // If modal is not open or no runestone, don't render anything
   if (!isOpen || !runestone) {
@@ -20,14 +44,22 @@ export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalPro
   const handleMarkAsVisited = async () => {
     setIsMarkingVisited(true);
     setVisitedError(null);
-    
+
     try {
-      await supabaseRunestones.markAsVisited(runestone.id);
-      // You could add a success message or visual feedback here
-      console.log('Runestone marked as visited!');
+      if (isVisited) {
+        // Unmark as visited
+        await supabaseRunestones.deleteVisited(runestone.id);
+        setIsVisited(false);
+        console.log('Runestone unmarked as visited!');
+      } else {
+        // Mark as visited
+        await supabaseRunestones.markAsVisited(runestone.id);
+        setIsVisited(true);
+        console.log('Runestone marked as visited!');
+      }
     } catch (error) {
-      console.error('Error marking runestone as visited:', error);
-      setVisitedError('Failed to mark as visited. Please try again.');
+      console.error('Error updating visited status:', error);
+      setVisitedError('Failed to update visited status. Please try again.');
     } finally {
       setIsMarkingVisited(false);
     }
@@ -36,24 +68,16 @@ export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalPro
   return (
     <>
       {/* Backdrop - dark overlay behind the modal */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-[1000]"
-        onClick={onClose}
-      />
-      
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000]" onClick={onClose} />
+
       {/* Modal container */}
       <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
         {/* Modal content */}
         <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-800">
-              {runestone.signature_text}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
-            >
+            <h2 className="text-xl font-bold text-gray-800">{runestone.signature_text}</h2>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl font-bold">
               ×
             </button>
           </div>
@@ -67,12 +91,8 @@ export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalPro
                 <div className="bg-gray-50 p-3 rounded">
                   <p className="text-gray-800">{runestone.found_location}</p>
                   <p className="text-sm text-gray-600">{runestone.parish}</p>
-                  {runestone.district && (
-                    <p className="text-sm text-gray-600">{runestone.district}</p>
-                  )}
-                  {runestone.municipality && (
-                    <p className="text-sm text-gray-600">{runestone.municipality}</p>
-                  )}
+                  {runestone.district && <p className="text-sm text-gray-600">{runestone.district}</p>}
+                  {runestone.municipality && <p className="text-sm text-gray-600">{runestone.municipality}</p>}
                   {runestone.current_location && (
                     <p className="text-sm text-gray-600">Current: {runestone.current_location}</p>
                   )}
@@ -83,15 +103,27 @@ export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalPro
               <div>
                 <h3 className="font-semibold text-gray-700 mb-2">Details</h3>
                 <div className="bg-gray-50 p-3 rounded space-y-1">
-                  <p className="text-sm"><span className="font-medium">Material:</span> {runestone.material || "Unknown"}</p>
-                  <p className="text-sm"><span className="font-medium">Dating:</span> {runestone.dating || "Unknown"}</p>
-                  <p className="text-sm"><span className="font-medium">Type:</span> {runestone.rune_type || "Unknown"}</p>
-                  <p className="text-sm"><span className="font-medium">Style:</span> {runestone.material_type || "Unknown"}</p>
+                  <p className="text-sm">
+                    <span className="font-medium">Material:</span> {runestone.material || 'Unknown'}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Dating:</span> {runestone.dating || 'Unknown'}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Type:</span> {runestone.rune_type || 'Unknown'}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Style:</span> {runestone.material_type || 'Unknown'}
+                  </p>
                   {runestone.carver && (
-                    <p className="text-sm"><span className="font-medium">Carver:</span> {runestone.carver}</p>
+                    <p className="text-sm">
+                      <span className="font-medium">Carver:</span> {runestone.carver}
+                    </p>
                   )}
                   {runestone.style && (
-                    <p className="text-sm"><span className="font-medium">Style:</span> {runestone.style}</p>
+                    <p className="text-sm">
+                      <span className="font-medium">Style:</span> {runestone.style}
+                    </p>
                   )}
                 </div>
               </div>
@@ -100,9 +132,15 @@ export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalPro
               <div>
                 <h3 className="font-semibold text-gray-700 mb-2">Status</h3>
                 <div className="bg-gray-50 p-3 rounded space-y-1">
-                  <p className="text-sm"><span className="font-medium">Lost:</span> {runestone.lost ? "Yes" : "No"}</p>
-                  <p className="text-sm"><span className="font-medium">Ornamental:</span> {runestone.ornamental ? "Yes" : "No"}</p>
-                  <p className="text-sm"><span className="font-medium">Recent:</span> {runestone.recent ? "Yes" : "No"}</p>
+                  <p className="text-sm">
+                    <span className="font-medium">Lost:</span> {runestone.lost ? 'Yes' : 'No'}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Ornamental:</span> {runestone.ornamental ? 'Yes' : 'No'}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Recent:</span> {runestone.recent ? 'Yes' : 'No'}
+                  </p>
                 </div>
               </div>
 
@@ -159,25 +197,29 @@ export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalPro
           <div className="flex justify-between items-center p-4 border-t border-gray-200">
             <button
               onClick={handleMarkAsVisited}
-              disabled={isMarkingVisited}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              disabled={isMarkingVisited || isCheckingVisited}
+              className={`px-4 py-2 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${
+                isVisited ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+              }`}
             >
               {isMarkingVisited ? (
                 <>
                   <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  <span>Marking...</span>
+                  <span>{isVisited ? 'Unmarking...' : 'Marking...'}</span>
+                </>
+              ) : isCheckingVisited ? (
+                <>
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Checking...</span>
                 </>
               ) : (
                 <>
-                  <span>Mark as Visited</span>
+                  <span>{isVisited ? 'Unmark as Visited' : 'Mark as Visited'}</span>
                 </>
               )}
             </button>
-            
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-            >
+
+            <button onClick={onClose} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
               Close
             </button>
           </div>
@@ -185,4 +227,4 @@ export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalPro
       </div>
     </>
   );
-}; 
+};
