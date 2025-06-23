@@ -1,47 +1,104 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { GeolocateControl, Map, Popup, GeoJSONSource } from 'maplibre-gl';
+import { GeolocateControl, Map, GeoJSONSource } from 'maplibre-gl';
 import { runestonesCache } from '../services/runestonesCache';
-import { getRunestonePopupHTML } from './RunestonePopup';
+import { supabaseRunestones } from '../services/supabaseRunestones';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
+import { RunestoneModal } from './RunestoneModal';
+
+// Cluster styling constants
+const CLUSTER_COLORS = {
+  SMALL: '#8B4513', // Dark brown for clusters with < 100 points
+  MEDIUM: '#A0522D', // Medium brown for clusters with 100-750 points
+  LARGE: '#CD853F', // Light brown for clusters with > 750 points
+} as const;
+
+const CLUSTER_RADIUSES = {
+  SMALL: 20, // Radius for clusters with < 100 points
+  MEDIUM: 30, // Radius for clusters with 100-750 points
+  LARGE: 40, // Radius for clusters with > 750 points
+} as const;
+
+const CLUSTER_THRESHOLDS = {
+  MEDIUM: 100, // Threshold for medium clusters
+  LARGE: 750, // Threshold for large clusters
+} as const;
 
 interface MapComponentProps {
-  onRunestoneCountChange?: (count: number) => void;
+  onVisitedCountChange?: (count: number) => void;
 }
 
-export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
+export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const moveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const currentPopupRef = useRef<Popup | null>(null);
   const eventListenersAddedRef = useRef<boolean>(false);
   const styleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [runestones, setRunestones] = useState<Runestone[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const closeCurrentPopup = useCallback(() => {
-    if (currentPopupRef.current) {
-      currentPopupRef.current.remove();
-      currentPopupRef.current = null;
+  // Modal state
+  const [selectedRunestone, setSelectedRunestone] = useState<Runestone | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Function to open modal with a runestone
+  const openModal = (runestone: Runestone) => {
+    setSelectedRunestone(runestone);
+    setIsModalOpen(true);
+  };
+
+  // Function to close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedRunestone(null);
+  };
+
+  // Function to refresh visited status
+  const refreshVisitedStatus = useCallback(async () => {
+    if (runestones.length === 0) return;
+
+    try {
+      // Fetch visited runestones
+      const visitedRunestones = await supabaseRunestones.getAllVisitedRunestones();
+
+      // Create a set of visited runestone IDs for quick lookup
+      const visitedIds = new Set(visitedRunestones.map((rs) => rs.id));
+
+      // Update runestones with new visited status
+      setRunestones((prevRunestones) =>
+        prevRunestones.map((runestone) => ({
+          ...runestone,
+          visited: visitedIds.has(runestone.id),
+        }))
+      );
+    } catch (error) {
+      console.error('Error refreshing visited status:', error);
     }
-  }, []);
-
-  const createPopup = useCallback(
-    (coordinates: [number, number], htmlContent: string) => {
-      closeCurrentPopup();
-      const popup = new Popup({ closeButton: true, closeOnClick: false }).setLngLat(coordinates).setHTML(htmlContent);
-
-      currentPopupRef.current = popup;
-      return popup;
-    },
-    [closeCurrentPopup]
-  );
+  }, [runestones.length]);
 
   const fetchVisibleRunestones = useCallback(async (bounds: [number, number, number, number]) => {
     setLoading(true);
     try {
       // Try to get data from cache first
       const cachedData = await runestonesCache.getRunestones(bounds);
-      setRunestones(cachedData);
+
+      // Fetch visited runestones
+      let visitedRunestones: { id: number; created_at: string }[] = [];
+      try {
+        visitedRunestones = await supabaseRunestones.getAllVisitedRunestones();
+      } catch (error) {
+        console.error('Error fetching visited runestones:', error);
+      }
+
+      // Create a set of visited runestone IDs for quick lookup
+      const visitedIds = new Set(visitedRunestones.map((rs) => rs.id));
+
+      // Merge visited status with runestone data
+      const runestonesWithVisitedStatus = cachedData.map((runestone) => ({
+        ...runestone,
+        visited: visitedIds.has(runestone.id),
+      }));
+
+      setRunestones(runestonesWithVisitedStatus);
     } catch (error) {
       console.error('Error fetching runestones:', error);
     } finally {
@@ -100,6 +157,7 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
             transliteration: stone.transliteration,
             overlapping_count: stonesAtLocation.length,
             original_coordinates: [stone.longitude, stone.latitude],
+            visited: stone.visited || false,
           },
           geometry: {
             type: 'Point',
@@ -159,8 +217,11 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
       if (map.getLayer('cluster-count')) {
         map.removeLayer('cluster-count');
       }
-      if (map.getLayer('unclustered-point')) {
-        map.removeLayer('unclustered-point');
+      if (map.getLayer('unclustered-point-unvisited')) {
+        map.removeLayer('unclustered-point-unvisited');
+      }
+      if (map.getLayer('unclustered-point-visited')) {
+        map.removeLayer('unclustered-point-visited');
       }
       if (map.getSource('runestones')) {
         map.removeSource('runestones');
@@ -199,20 +260,20 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           'circle-color': [
             'step',
             ['get', 'point_count'],
-            '#51bbd6', // Color for clusters with < 100 points
-            100,
-            '#f1f075', // Color for clusters with 100-750 points
-            750,
-            '#f28cb1', // Color for clusters with > 750 points
+            CLUSTER_COLORS.SMALL,
+            CLUSTER_THRESHOLDS.MEDIUM,
+            CLUSTER_COLORS.MEDIUM,
+            CLUSTER_THRESHOLDS.LARGE,
+            CLUSTER_COLORS.LARGE,
           ],
           'circle-radius': [
             'step',
             ['get', 'point_count'],
-            20, // Radius for clusters with < 100 points
-            100,
-            30, // Radius for clusters with 100-750 points
-            750,
-            40, // Radius for clusters with > 750 points
+            CLUSTER_RADIUSES.SMALL,
+            CLUSTER_THRESHOLDS.MEDIUM,
+            CLUSTER_RADIUSES.MEDIUM,
+            CLUSTER_THRESHOLDS.LARGE,
+            CLUSTER_RADIUSES.LARGE,
           ],
         },
       });
@@ -233,14 +294,28 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         },
       });
 
-      // Add individual runestone points (unclustered)
+      // Add individual runestone points (unclustered) - unvisited runestones
       map.addLayer({
-        id: 'unclustered-point',
+        id: 'unclustered-point-unvisited',
         type: 'circle',
         source: 'runestones',
-        filter: ['!', ['has', 'point_count']],
+        filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'visited'], false]],
         paint: {
           'circle-color': '#FF0000',
+          'circle-radius': 6,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#fff',
+        },
+      });
+
+      // Add individual runestone points (unclustered) - visited runestones
+      map.addLayer({
+        id: 'unclustered-point-visited',
+        type: 'circle',
+        source: 'runestones',
+        filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'visited'], true]],
+        paint: {
+          'circle-color': '#00FF00',
           'circle-radius': 6,
           'circle-stroke-width': 2,
           'circle-stroke-color': '#fff',
@@ -275,28 +350,33 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           }
         });
 
-        // Click event for individual runestones - show popup
-        map.on('click', 'unclustered-point', (e) => {
+        // Click event for individual runestones - open modal (both visited and unvisited)
+        map.on('click', 'unclustered-point-unvisited', (e) => {
           const feature = e.features?.[0];
           if (!feature || !feature.geometry || feature.geometry.type !== 'Point') return;
 
-          const coordinates = feature.geometry.coordinates.slice() as [number, number];
           const properties = feature.properties!;
 
           // Find the full runestone data using the id
           const runestone = runestones.find((stone) => stone.id === properties.id);
           if (!runestone) return;
 
-          // Ensure that if the map is zoomed out such that multiple
-          // copies of the feature are visible, the popup appears
-          // over the copy being pointed to.
-          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-            coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-          }
+          // Open the modal with this runestone
+          openModal(runestone);
+        });
 
-          const popupContent = getRunestonePopupHTML(runestone);
+        map.on('click', 'unclustered-point-visited', (e) => {
+          const feature = e.features?.[0];
+          if (!feature || !feature.geometry || feature.geometry.type !== 'Point') return;
 
-          createPopup(coordinates, popupContent).addTo(map);
+          const properties = feature.properties!;
+
+          // Find the full runestone data using the id
+          const runestone = runestones.find((stone) => stone.id === properties.id);
+          if (!runestone) return;
+
+          // Open the modal with this runestone
+          openModal(runestone);
         });
 
         // Change cursor to pointer when hovering over clusters or points
@@ -306,17 +386,23 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
         map.on('mouseleave', 'clusters', () => {
           map.getCanvas().style.cursor = '';
         });
-        map.on('mouseenter', 'unclustered-point', () => {
+        map.on('mouseenter', 'unclustered-point-unvisited', () => {
           map.getCanvas().style.cursor = 'pointer';
         });
-        map.on('mouseleave', 'unclustered-point', () => {
+        map.on('mouseleave', 'unclustered-point-unvisited', () => {
+          map.getCanvas().style.cursor = '';
+        });
+        map.on('mouseenter', 'unclustered-point-visited', () => {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'unclustered-point-visited', () => {
           map.getCanvas().style.cursor = '';
         });
       }
     } catch (error) {
       console.error('Error adding clustering layers:', error);
     }
-  }, [runestones, createGeoJSONData, createPopup]);
+  }, [runestones, createGeoJSONData]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -379,12 +465,11 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
       if (styleTimeoutRef.current) {
         clearTimeout(styleTimeoutRef.current);
       }
-      closeCurrentPopup();
       if (mapRef.current) {
         mapRef.current.remove();
       }
     };
-  }, [debouncedFetchVisibleRunestones, fetchVisibleRunestones, closeCurrentPopup]);
+  }, [debouncedFetchVisibleRunestones, fetchVisibleRunestones]);
 
   // Update clusters when runestones change
   useEffect(() => {
@@ -399,10 +484,11 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
   }, [updateClusters, runestones.length]);
 
   useEffect(() => {
-    if (onRunestoneCountChange) {
-      onRunestoneCountChange(runestones.length);
+    if (onVisitedCountChange) {
+      const visitedCount = runestones.filter((runestone) => runestone.visited).length;
+      onVisitedCountChange(visitedCount);
     }
-  }, [onRunestoneCountChange, runestones.length]);
+  }, [onVisitedCountChange, runestones]);
 
   return (
     <div className="relative w-full h-full">
@@ -417,6 +503,14 @@ export const MapComponent = ({ onRunestoneCountChange }: MapComponentProps) => {
           </div>
         </div>
       )}
+
+      {/* Runestone Modal */}
+      <RunestoneModal
+        runestone={selectedRunestone}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onVisitedStatusChange={refreshVisitedStatus}
+      />
     </div>
   );
 };

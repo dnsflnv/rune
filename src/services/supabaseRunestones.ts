@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { Runestone } from '../types';
+import { authService } from './auth';
 
 class SupabaseRunestonesService {
   private static instance: SupabaseRunestonesService;
@@ -92,6 +93,61 @@ class SupabaseRunestonesService {
       ornamental: Boolean(row.ornamental),
       recent: Boolean(row.recent),
     }));
+  }
+
+  async getAllVisitedRunestones(): Promise<Runestone[]> {
+    const { data, error } = await supabase.rpc('get_all_visited_runestones', {
+      p_user_id: authService.getUser()?.id,
+    });
+
+    if (error) {
+      console.error('Error fetching visited runestones:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  async markAsVisited(runestoneId: number): Promise<boolean> {
+    const { data, error } = await supabase.rpc('mark_runestone_as_visited', {
+      p_signature_id: runestoneId,
+      p_user_id: authService.getUser()?.id,
+    });
+
+    if (error) {
+      console.error('Error marking runestone as visited:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  async isVisited(runestoneId: number): Promise<boolean> {
+    const { data, error } = await supabase.rpc('is_runestone_visited', {
+      p_signature_id: runestoneId,
+      p_user_id: authService.getUser()?.id,
+    });
+
+    if (error) {
+      console.error('Error checking if runestone is visited:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
+  async deleteVisited(runestoneId: number): Promise<boolean> {
+    const { data, error } = await supabase.rpc('delete_runestone_visited', {
+      p_signature_id: runestoneId,
+      p_user_id: authService.getUser()?.id,
+    });
+
+    if (error) {
+      console.error('Error deleting runestone visited record:', error);
+      throw error;
+    }
+
+    return data;
   }
 }
 
