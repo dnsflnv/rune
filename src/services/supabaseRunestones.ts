@@ -96,8 +96,13 @@ class SupabaseRunestonesService {
   }
 
   async getAllVisitedRunestones(): Promise<Runestone[]> {
+    const user = authService.getUser();
+    if (!user) {
+      console.warn('getAllVisitedRunestones: User not logged in');
+      return [];
+    }
     const { data, error } = await supabase.rpc('get_all_visited_runestones', {
-      p_user_id: authService.getUser()?.id,
+      p_user_id: user.id,
     });
 
     if (error) {
@@ -109,9 +114,14 @@ class SupabaseRunestonesService {
   }
 
   async markAsVisited(runestoneId: number): Promise<boolean> {
+    const user = authService.getUser();
+    if (!user) {
+      console.warn('markAsVisited: User not logged in');
+      return false;
+    }
     const { data, error } = await supabase.rpc('mark_runestone_as_visited', {
       p_signature_id: runestoneId,
-      p_user_id: authService.getUser()?.id,
+      p_user_id: user.id,
     });
 
     if (error) {
@@ -123,9 +133,14 @@ class SupabaseRunestonesService {
   }
 
   async isVisited(runestoneId: number): Promise<boolean> {
+    const user = authService.getUser();
+    if (!user) {
+      console.warn('isVisited: User not logged in');
+      return false;
+    }
     const { data, error } = await supabase.rpc('is_runestone_visited', {
       p_signature_id: runestoneId,
-      p_user_id: authService.getUser()?.id,
+      p_user_id: user.id,
     });
 
     if (error) {
@@ -137,9 +152,14 @@ class SupabaseRunestonesService {
   }
 
   async deleteVisited(runestoneId: number): Promise<boolean> {
+    const user = authService.getUser();
+    if (!user) {
+      console.warn('deleteVisited: User not logged in');
+      return false;
+    }
     const { data, error } = await supabase.rpc('delete_runestone_visited', {
       p_signature_id: runestoneId,
-      p_user_id: authService.getUser()?.id,
+      p_user_id: user.id,
     });
 
     if (error) {
