@@ -6,9 +6,10 @@ interface RunestoneModalProps {
   runestone: Runestone | null;
   isOpen: boolean;
   onClose: () => void;
+  onVisitedStatusChange?: () => void;
 }
 
-export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalProps) => {
+export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChange }: RunestoneModalProps) => {
   const [isMarkingVisited, setIsMarkingVisited] = useState(false);
   const [visitedError, setVisitedError] = useState<string | null>(null);
   const [isVisited, setIsVisited] = useState(false);
@@ -56,6 +57,11 @@ export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalPro
         await supabaseRunestones.markAsVisited(runestone.id);
         setIsVisited(true);
         console.log('Runestone marked as visited!');
+      }
+
+      // Notify parent component to refresh map data
+      if (onVisitedStatusChange) {
+        onVisitedStatusChange();
       }
     } catch (error) {
       console.error('Error updating visited status:', error);

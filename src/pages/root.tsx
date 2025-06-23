@@ -3,14 +3,11 @@ import { useState } from 'react';
 import { MapComponent } from '../components/MapComponent';
 import { Sidebar } from '../components/Sidebar';
 
-const menuItems = [
-  { key: '1', label: 'All Runestones' },
-  { key: '2', label: 'Visited Runestones' },
-];
+const menuItems = [{ key: '1', label: 'Runestones' }];
 
 export const Root = () => {
   const [activeItem, setActiveItem] = useState('1');
-  const [runestoneCount, setRunestoneCount] = useState(0);
+  const [visitedCount, setVisitedCount] = useState(0);
 
   return (
     <div className="h-screen bg-gray-50">
@@ -20,13 +17,13 @@ export const Root = () => {
         <Sidebar
           activeItem={activeItem}
           setActiveItem={setActiveItem}
-          runestoneCount={runestoneCount}
+          visitedCount={visitedCount}
           menuItems={menuItems}
         />
 
         {/* Main content area */}
         <div className="flex-1 relative">
-          <MapComponent onRunestoneCountChange={setRunestoneCount} />
+          <MapComponent onVisitedCountChange={setVisitedCount} />
         </div>
       </div>
     </div>

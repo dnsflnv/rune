@@ -95,6 +95,19 @@ class SupabaseRunestonesService {
     }));
   }
 
+  async getAllVisitedRunestones(): Promise<Runestone[]> {
+    const { data, error } = await supabase.rpc('get_all_visited_runestones', {
+      p_user_id: authService.getUser()?.id,
+    });
+
+    if (error) {
+      console.error('Error fetching visited runestones:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
   async markAsVisited(runestoneId: number): Promise<boolean> {
     const { data, error } = await supabase.rpc('mark_runestone_as_visited', {
       p_signature_id: runestoneId,

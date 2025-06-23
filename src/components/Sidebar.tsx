@@ -1,5 +1,12 @@
 import { AuthWidget } from './AuthWidget';
 
+// Cluster styling constants (matching MapComponent)
+const CLUSTER_COLORS = {
+  SMALL: '#8B4513', // Dark brown for clusters with < 100 points
+  MEDIUM: '#A0522D', // Medium brown for clusters with 100-750 points
+  LARGE: '#CD853F', // Light brown for clusters with > 750 points
+} as const;
+
 interface MenuItem {
   key: string;
   label: string;
@@ -8,11 +15,11 @@ interface MenuItem {
 interface SidebarProps {
   activeItem: string;
   setActiveItem: (key: string) => void;
-  runestoneCount: number;
+  visitedCount: number;
   menuItems: MenuItem[];
 }
 
-export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }: SidebarProps) => {
+export const Sidebar = ({ activeItem, setActiveItem, visitedCount, menuItems }: SidebarProps) => {
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
       {/* Header */}
@@ -39,10 +46,10 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
         </ul>
       </nav>
 
-      {/* Runestone Count */}
+      {/* Visited Runestone Count */}
       <div className="p-4 border-t border-gray-200">
         <div className="text-sm text-gray-600 text-center">
-          <span className="font-medium text-primary">{runestoneCount}</span> visible runestones
+          <span className="font-medium text-primary">{visitedCount}</span> visited runestones
         </div>
       </div>
 
@@ -51,20 +58,24 @@ export const Sidebar = ({ activeItem, setActiveItem, runestoneCount, menuItems }
         <div className="text-xs font-medium text-gray-700 mb-3">Map Legend:</div>
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-xs">
-            <div className="w-3 h-3 rounded-full bg-[#51bbd6]"></div>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CLUSTER_COLORS.SMALL }}></div>
             <span className="text-gray-600">&lt; 100 stones</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <div className="w-3 h-3 rounded-full bg-[#f1f075]"></div>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CLUSTER_COLORS.MEDIUM }}></div>
             <span className="text-gray-600">100-750 stones</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <div className="w-3 h-3 rounded-full bg-[#f28cb1]"></div>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CLUSTER_COLORS.LARGE }}></div>
             <span className="text-gray-600">&gt; 750 stones</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
             <div className="w-3 h-3 rounded-full bg-red-500 border-2 border-white"></div>
-            <span className="text-gray-600">Individual stone</span>
+            <span className="text-gray-600">Unvisited stone</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <div className="w-3 h-3 rounded-full bg-green-500 border-2 border-white"></div>
+            <span className="text-gray-600">Visited stone</span>
           </div>
         </div>
       </div>

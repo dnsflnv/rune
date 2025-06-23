@@ -21,6 +21,7 @@ export interface Runestone {
   lost: boolean;
   ornamental: boolean;
   recent: boolean;
+  visited?: boolean;
 }
 
 export interface RunestoneFeature {
@@ -41,6 +42,7 @@ export interface RunestoneFeature {
     // Properties for handling overlapping runestones
     overlapping_count?: number;
     original_coordinates?: [number, number];
+    visited?: boolean;
   };
   geometry: {
     type: 'Point';
@@ -51,4 +53,4 @@ export interface RunestoneFeature {
 export interface RunestoneGeoJSON {
   type: 'FeatureCollection';
   features: RunestoneFeature[];
-} 
+}
