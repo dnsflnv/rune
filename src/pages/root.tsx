@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { useState } from 'react';
 import { MapComponent } from '../components/MapComponent';
-import { Sidebar } from '../components/Sidebar';
+import { Sidebar } from '../components/Sidebar/Sidebar';
 
 const menuItems = [{ key: '1', label: 'Runestones' }];
 
