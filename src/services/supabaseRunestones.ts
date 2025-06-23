@@ -95,28 +95,46 @@ class SupabaseRunestonesService {
     }));
   }
 
-  async markAsVisited(runestoneId: number): Promise<void> {
-
-    const { error } = await supabase.schema('rune').from('visited').insert({
-      signature_id: runestoneId,
-      user_id: authService.getUser()?.id,
+  async markAsVisited(runestoneId: number): Promise<boolean> {
+    const { data, error } = await supabase.rpc('mark_runestone_as_visited', {
+      p_signature_id: runestoneId,
+      p_user_id: authService.getUser()?.id,
     });
 
     if (error) {
       console.error('Error marking runestone as visited:', error);
       throw error;
     }
+
+    return data;
   }
 
   async isVisited(runestoneId: number): Promise<boolean> {
-    const { data, error } = await supabase.schema('rune').from('visited').select('*').eq('signature_id', runestoneId).eq('user_id', authService.getUser()?.id);
+    const { data, error } = await supabase.rpc('is_runestone_visited', {
+      p_signature_id: runestoneId,
+      p_user_id: authService.getUser()?.id,
+    });
 
     if (error) {
       console.error('Error checking if runestone is visited:', error);
       throw error;
     }
 
-    return data?.length > 0;
+    return data;
+  }
+
+  async deleteVisited(runestoneId: number): Promise<boolean> {
+    const { data, error } = await supabase.rpc('delete_runestone_visited', {
+      p_signature_id: runestoneId,
+      p_user_id: authService.getUser()?.id,
+    });
+
+    if (error) {
+      console.error('Error deleting runestone visited record:', error);
+      throw error;
+    }
+
+    return data;
   }
 }
 
