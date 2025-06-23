@@ -37,7 +37,7 @@ export const Sidebar = ({
         fixed z-30 top-0 left-0 h-screen min-h-0 w-64 bg-white border-r border-gray-200 flex flex-col
         transition-transform duration-200 ease-in-out
         ${visible ? 'translate-x-0' : '-translate-x-full'}
-        md:static md:translate-x-0 md:block
+        md:static md:translate-x-0
       `}
       style={{ boxShadow: visible && isMobile ? '0 0 0 9999px rgba(0,0,0,0.0)' : undefined }}
       aria-label="Sidebar"
