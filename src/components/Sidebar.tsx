@@ -17,24 +17,57 @@ interface SidebarProps {
   setActiveItem: (key: string) => void;
   visitedCount: number;
   menuItems: MenuItem[];
+  visible?: boolean;
+  onClose?: () => void;
 }
 
-export const Sidebar = ({ activeItem, setActiveItem, visitedCount, menuItems }: SidebarProps) => {
+export const Sidebar = ({
+  activeItem,
+  setActiveItem,
+  visitedCount,
+  menuItems,
+  visible = false,
+  onClose,
+}: SidebarProps) => {
+  // Helper to detect mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+    <aside
+      className={`
+        fixed z-30 top-0 left-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col
+        transition-transform duration-200 ease-in-out
+        ${visible ? 'translate-x-0' : '-translate-x-full'}
+        md:static md:translate-x-0 md:block
+      `}
+      style={{ boxShadow: visible && isMobile ? '0 0 0 9999px rgba(0,0,0,0.0)' : undefined }}
+      aria-label="Sidebar"
+    >
+      {/* Close button for mobile */}
+      <button
+        className="absolute top-4 right-4 z-40 md:hidden bg-white border border-gray-300 rounded p-1 shadow"
+        style={{ display: visible ? 'block' : 'none' }}
+        onClick={onClose}
+        aria-label="Close sidebar"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-primary">Runestone Safari</h1>
+        <h1 className="text-xl font-bold text-primary">Runestone Safari β</h1>
         <p className="text-sm text-gray-600 mt-1">Explore Swedish heritage</p>
       </div>
-
       {/* Navigation Menu */}
       <nav className="flex-1">
         <ul className="py-2">
           {menuItems.map((item) => (
             <li key={item.key}>
               <button
-                onClick={() => setActiveItem(item.key)}
+                onClick={() => {
+                  setActiveItem(item.key);
+                  if (onClose && window.innerWidth < 768) onClose();
+                }}
                 className={`w-full text-left sidebar-item flex items-center gap-3 ${
                   activeItem === item.key ? 'active' : ''
                 }`}
@@ -104,6 +137,6 @@ export const Sidebar = ({ activeItem, setActiveItem, visitedCount, menuItems }: 
           <p className="mt-1">© 2025 Denis Filonov</p>
         </div>
       </div>
-    </div>
+    </aside>
   );
 };
