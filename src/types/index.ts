@@ -43,6 +43,7 @@ export interface RunestoneFeature {
     overlapping_count?: number;
     original_coordinates?: [number, number];
     visited?: boolean;
+    created_at?: string;
   };
   geometry: {
     type: 'Point';

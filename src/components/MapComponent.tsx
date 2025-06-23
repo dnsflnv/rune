@@ -82,7 +82,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
       const cachedData = await runestonesCache.getRunestones(bounds);
 
       // Fetch visited runestones
-      let visitedRunestones: { id: number; created_at: string }[] = [];
+      let visitedRunestones: Runestone[] = [];
       try {
         visitedRunestones = await supabaseRunestones.getAllVisitedRunestones();
       } catch (error) {
