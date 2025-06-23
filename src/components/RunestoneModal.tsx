@@ -1,4 +1,6 @@
 import { Runestone } from '../types';
+import { supabaseRunestones } from '../services/supabaseRunestones';
+import { useState } from 'react';
 
 interface RunestoneModalProps {
   runestone: Runestone | null;
@@ -7,10 +9,29 @@ interface RunestoneModalProps {
 }
 
 export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalProps) => {
+  const [isMarkingVisited, setIsMarkingVisited] = useState(false);
+  const [visitedError, setVisitedError] = useState<string | null>(null);
+
   // If modal is not open or no runestone, don't render anything
   if (!isOpen || !runestone) {
     return null;
   }
+
+  const handleMarkAsVisited = async () => {
+    setIsMarkingVisited(true);
+    setVisitedError(null);
+    
+    try {
+      await supabaseRunestones.markAsVisited(runestone.id);
+      // You could add a success message or visual feedback here
+      console.log('Runestone marked as visited!');
+    } catch (error) {
+      console.error('Error marking runestone as visited:', error);
+      setVisitedError('Failed to mark as visited. Please try again.');
+    } finally {
+      setIsMarkingVisited(false);
+    }
+  };
 
   return (
     <>
@@ -127,8 +148,32 @@ export const RunestoneModal = ({ runestone, isOpen, onClose }: RunestoneModalPro
             </div>
           </div>
 
+          {/* Error Message */}
+          {visitedError && (
+            <div className="px-4 pb-2">
+              <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{visitedError}</p>
+            </div>
+          )}
+
           {/* Footer */}
-          <div className="flex justify-end p-4 border-t border-gray-200">
+          <div className="flex justify-between items-center p-4 border-t border-gray-200">
+            <button
+              onClick={handleMarkAsVisited}
+              disabled={isMarkingVisited}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isMarkingVisited ? (
+                <>
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span>Marking...</span>
+                </>
+              ) : (
+                <>
+                  <span>Mark as Visited</span>
+                </>
+              )}
+            </button>
+            
             <button
               onClick={onClose}
               className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
