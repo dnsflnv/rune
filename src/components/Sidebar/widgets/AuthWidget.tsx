@@ -93,12 +93,28 @@ export const AuthWidget = () => {
         <div className="text-sm text-gray-600 mb-2">
           Signed in as <span className="font-medium">{authUser.email}</span>
         </div>
-        <button
-          onClick={handleSignOut}
-          className="w-full px-3 py-2 text-sm text-white bg-primary rounded hover:bg-primary/90 transition-colors"
-        >
-          Sign Out
-        </button>
+        <div className="space-y-2">
+          <a
+            href="/profile"
+            className="w-full px-3 py-2 text-sm text-primary border border-primary rounded hover:bg-primary hover:text-white transition-colors flex items-center justify-center"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+            View Profile
+          </a>
+          <button
+            onClick={handleSignOut}
+            className="w-full px-3 py-2 text-sm text-white bg-primary rounded hover:bg-primary/90 transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
       </div>
     );
   }
