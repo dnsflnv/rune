@@ -1,9 +1,7 @@
 /* Custom styles for MapLibre GL */
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 html,
 body,
@@ -66,35 +64,56 @@ body {
 }
 
 /* Custom component styles */
-@layer components {
-  .btn-primary {
-    @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded transition-colors duration-200;
-  }
+.btn-primary {
+  background-color: #866c53;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
 
-  .btn-secondary {
-    @apply bg-accent hover:bg-accent/90 text-white font-medium py-2 px-4 rounded transition-colors duration-200;
-  }
+.btn-primary:hover {
+  background-color: rgba(134, 108, 83, 0.9);
+}
 
-  .sidebar-item {
-    @apply px-4 py-3 hover:bg-gray-100 cursor-pointer transition-colors duration-200 border-b border-gray-100;
-  }
+.btn-secondary {
+  background-color: #df6446;
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
 
-  .sidebar-item.active {
-    @apply bg-primary text-white;
-  }
+.btn-secondary:hover {
+  background-color: rgba(223, 100, 70, 0.9);
+}
 
-  .sidebar-item:hover {
-    @apply bg-primary/10;
-  }
+.sidebar-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #f3f4f6;
+}
 
-  .sidebar-item.active:hover {
-    @apply bg-primary text-white;
-  }
+.sidebar-item:hover {
+  background-color: rgba(134, 108, 83, 0.1);
+}
 
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+.sidebar-item.active {
+  background-color: #866c53;
+  color: white;
+}
+
+.sidebar-item.active:hover {
+  background-color: #866c53;
+  color: white;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
