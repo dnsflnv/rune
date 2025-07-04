@@ -110,6 +110,11 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
                   {runestone.current_location && (
                     <p className="text-sm text-gray-600">Current: {runestone.current_location}</p>
                   )}
+                  {runestone.latitude && runestone.longitude && (
+                    <p className="text-sm text-gray-600">
+                      {runestone.latitude}, {runestone.longitude}
+                    </p>
+                  )}
                 </div>
               </div>
 
