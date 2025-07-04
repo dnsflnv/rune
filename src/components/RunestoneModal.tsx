@@ -87,7 +87,7 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
       {/* Modal container */}
       <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
         {/* Modal content */}
-        <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-800">{runestone.signature_text}</h2>
@@ -109,6 +109,11 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
                   {runestone.municipality && <p className="text-sm text-gray-600">{runestone.municipality}</p>}
                   {runestone.current_location && (
                     <p className="text-sm text-gray-600">Current: {runestone.current_location}</p>
+                  )}
+                  {runestone.latitude && runestone.longitude && (
+                    <p className="text-sm text-gray-600">
+                      {runestone.latitude}, {runestone.longitude}
+                    </p>
                   )}
                 </div>
               </div>
