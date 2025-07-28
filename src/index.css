@@ -117,3 +117,16 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Force bg-primary to work */
+.bg-primary {
+  background-color: #866c53 !important;
+}
+
+.text-primary {
+  color: #866c53 !important;
+}
+
+.border-primary {
+  border-color: #866c53 !important;
+}
