@@ -82,10 +82,10 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
   return (
     <>
       {/* Backdrop - dark overlay behind the modal */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000]" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/50 z-1000" onClick={onClose} />
 
       {/* Modal container */}
-      <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-1001 flex items-center justify-center p-4">
         {/* Modal content */}
         <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
           {/* Header */}

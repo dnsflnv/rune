@@ -454,7 +454,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
 
       {/* Loading indicator */}
       {loading && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg shadow-lg z-[1001]">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg shadow-lg z-1001">
           <div className="flex items-center gap-3">
             <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></div>
             <span className="text-sm font-medium text-gray-700">Loading runestones...</span>

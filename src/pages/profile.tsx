@@ -188,7 +188,7 @@ export const Profile = () => {
             {/* User Info Section */}
             <div className="bg-gray-50 rounded-lg p-6 mb-8">
               <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
                     <span className="text-white text-xl font-semibold">
                       {user.email?.charAt(0).toUpperCase() || 'U'}
@@ -201,7 +201,7 @@ export const Profile = () => {
                     Member since {user.created_at ? formatDate(user.created_at) : 'Unknown'}
                   </p>
                 </div>
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <button
                     onClick={() => authService.signOut()}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -224,7 +224,7 @@ export const Profile = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div className="bg-gray-50 rounded-lg p-6">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
                       <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -240,7 +240,7 @@ export const Profile = () => {
 
               <div className="bg-gray-50 rounded-lg p-6">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
                       <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -261,7 +261,7 @@ export const Profile = () => {
 
               <div className="bg-gray-50 rounded-lg p-6">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
                       <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
