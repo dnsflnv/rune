@@ -78,7 +78,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     setLoading(true);
     try {
       // Fetch all runestones from IDB cache (which will fall back to Supabase if needed)
-      const allRunestones = await runestonesCache.getRunestones([-180, -90, 180, 90]); // Global bounds
+      const allRunestones = await runestonesCache.getAllRunestones();
 
       // Fetch visited runestones
       let visitedRunestones: Runestone[] = [];

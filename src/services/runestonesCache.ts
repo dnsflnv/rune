@@ -77,7 +77,19 @@ class RunestonesCache {
     return Date.now() - this.lastUpdate > this.CACHE_DURATION;
   }
 
-  async getRunestones(bounds: [number, number, number, number]): Promise<Runestone[]> {
+  async getAllRunestones(): Promise<Runestone[]> {
+    await this.initializeCache();
+
+    const db = await this.db;
+    const allStones = await db.getAll('runestones');
+    if (allStones.length < TOTAL_RUNESTONES) {
+      const allRunestones = await supabaseRunestones.getAllRunestones();
+      await this.updateCache(allRunestones);
+    }
+    return allStones;
+  }
+
+  async getRunestonesByBounds(bounds: [number, number, number, number]): Promise<Runestone[]> {
     await this.initializeCache(); // Ensure cache is initialized
 
     // Check if cache is expired
