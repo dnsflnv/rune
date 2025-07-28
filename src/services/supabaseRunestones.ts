@@ -54,6 +54,7 @@ class SupabaseRunestonesService {
       lost: Boolean(row.lost),
       ornamental: Boolean(row.ornamental),
       recent: Boolean(row.recent),
+      slug: row.slug || '',
     }));
   }
 
@@ -92,6 +93,7 @@ class SupabaseRunestonesService {
       lost: Boolean(row.lost),
       ornamental: Boolean(row.ornamental),
       recent: Boolean(row.recent),
+      slug: row.slug || '',
     }));
   }
 

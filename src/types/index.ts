@@ -22,6 +22,7 @@ export interface Runestone {
   ornamental: boolean;
   recent: boolean;
   visited?: boolean;
+  slug?: string;
 }
 
 export interface RunestoneFeature {

@@ -138,6 +138,18 @@ class RunestonesCache {
   async ensureCacheInitialized() {
     await this.initializeCache();
   }
+
+  async getRunestoneBySlug(slug: string): Promise<Runestone | null> {
+    await this.initializeCache();
+
+    const db = await this.db;
+    const allStones = await db.getAll('runestones');
+
+    // Find the runestone with matching slug
+    const runestone = allStones.find((stone) => stone.slug === slug);
+
+    return runestone || null;
+  }
 }
 
 export const runestonesCache = new RunestonesCache();
