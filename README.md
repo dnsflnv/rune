@@ -13,6 +13,7 @@ Runestone Safari is an interactive map application that allows you to explore Sw
 - Detailed information about each runestone
 - User authentication (not required)
 - User profile page
+- List of visited runestones
 - Ability to mark visited runestones (if you have account)
 
 ## Technology Stack
@@ -39,7 +40,6 @@ Runestone Safari is an interactive map application that allows you to explore Sw
 ## Roadmap
 
 - Search for runestones by name, location, or other attributes
-- Add runestones to visited list
 - Add photo to visited runestone (forced Creative Commons license)
 - Add collections of runestones, like a "Jarlabanke runestones", "Varganian runestones", "Estrid runestones"
 - Add some gamification
