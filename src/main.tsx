@@ -9,6 +9,7 @@ import { Privacy } from './pages/privacy';
 import { License } from './pages/license';
 import { Profile } from './pages/profile';
 import Runestone from './pages/runestone';
+import Runestones from './pages/runestones';
 
 const router = createBrowserRouter([
   {
@@ -18,22 +19,22 @@ const router = createBrowserRouter([
   },
   {
     path: '/about',
-    Component: About,
+    element: <About />,
     errorElement: <ErrorPage />,
   },
   {
     path: '/privacy',
-    Component: Privacy,
+    element: <Privacy />,
     errorElement: <ErrorPage />,
   },
   {
     path: '/license',
-    Component: License,
+    element: <License />,
     errorElement: <ErrorPage />,
   },
   {
     path: '/profile',
-    Component: Profile,
+    element: <Profile />,
     errorElement: <ErrorPage />,
   },
   {
@@ -41,11 +42,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: Runestone,
+        element: <Runestones />,
       },
       {
         path: ':slug',
-        Component: Runestone,
+        element: <Runestone />,
       },
     ],
     errorElement: <ErrorPage />,
