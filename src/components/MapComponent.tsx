@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GeolocateControl, Map, GeoJSONSource } from 'maplibre-gl';
 import { supabaseRunestones } from '../services/supabaseRunestones';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
@@ -51,7 +51,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
   };
 
   // Function to refresh visited status
-  const refreshVisitedStatus = useCallback(async () => {
+  const refreshVisitedStatus = async () => {
     if (runestones.length === 0) return;
 
     try {
@@ -71,9 +71,9 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     } catch (error) {
       console.error('Error refreshing visited status:', error);
     }
-  }, [runestones.length]);
+  };
 
-  const fetchAllRunestones = useCallback(async () => {
+  const fetchAllRunestones = async () => {
     setLoading(true);
     try {
       // Fetch all runestones from the database
@@ -102,9 +102,9 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  const createGeoJSONData = useCallback((stones: Runestone[]): RunestoneGeoJSON => {
+  const createGeoJSONData = (stones: Runestone[]): RunestoneGeoJSON => {
     // Check for and remove duplicates based on id
     const uniqueStones = stones.filter((stone, index, arr) => arr.findIndex((s) => s.id === stone.id) === index);
 
@@ -156,9 +156,9 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
       type: 'FeatureCollection',
       features,
     };
-  }, []);
+  };
 
-  const updateClusters = useCallback(() => {
+  const updateClusters = () => {
     if (!mapRef.current) return;
 
     const map = mapRef.current;
@@ -387,7 +387,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     } catch (error) {
       console.error('Error adding clustering layers:', error);
     }
-  }, [runestones, createGeoJSONData]);
+  };
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -439,7 +439,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
 
       return () => clearTimeout(timer);
     }
-  }, [updateClusters, runestones.length]);
+  }, [runestones.length]);
 
   useEffect(() => {
     if (onVisitedCountChange) {

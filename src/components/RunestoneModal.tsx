@@ -1,6 +1,6 @@
 import { Runestone } from '../types';
 import { supabaseRunestones } from '../services/supabaseRunestones';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { authService } from '../services/auth';
 
 interface RunestoneModalProps {
@@ -17,7 +17,7 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
   const [isCheckingVisited, setIsCheckingVisited] = useState(false);
   const [authUser, setAuthUser] = useState(() => authService.getUser());
 
-  const checkVisitedStatus = useCallback(async () => {
+  const checkVisitedStatus = async () => {
     if (!runestone) return;
     setIsCheckingVisited(true);
     try {
@@ -29,7 +29,7 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
     } finally {
       setIsCheckingVisited(false);
     }
-  }, [runestone]);
+  };
 
   useEffect(() => {
     if (isOpen && runestone) {
