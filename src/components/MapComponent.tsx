@@ -288,8 +288,8 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
         filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'visited'], false]],
         paint: {
           'circle-color': '#FF0000',
-          'circle-radius': 6,
-          'circle-stroke-width': 2,
+          'circle-radius': 9,
+          'circle-stroke-width': 3,
           'circle-stroke-color': '#fff',
         },
       });
@@ -302,8 +302,8 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
         filter: ['all', ['!', ['has', 'point_count']], ['==', ['get', 'visited'], true]],
         paint: {
           'circle-color': '#00FF00',
-          'circle-radius': 6,
-          'circle-stroke-width': 2,
+          'circle-radius': 9,
+          'circle-stroke-width': 3,
           'circle-stroke-color': '#fff',
         },
       });
