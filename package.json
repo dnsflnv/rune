@@ -1,7 +1,7 @@
 {
   "name": "rune",
   "private": true,
-  "version": "0.8.2",
+  "version": "0.8.3",
   "type": "module",
   "author": "Denis Filonov",
   "license": "GPL-3.0-or-later",
