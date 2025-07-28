@@ -1,6 +1,6 @@
 # Runestone Safari
 
-_Version 0.6_
+_Version 0.7_
 
 [https://runestonesafari.com/](https://runestonesafari.com/)
 
@@ -36,13 +36,13 @@ Runestone Safari is an interactive map application that allows you to explore Sw
 
 ## Roadmap
 
-- [ ] Search for runestones by name, location, or other attributes
-- [ ] Add runestones to visited list
-- [ ] Add photo to visited runestone (forced Creative Commons license)
-- [ ] Add collections of runestones, like a "Jarlabanke runestones", "Varganian runestones", "Estrid runestones"
-- [ ] Add some gamification
-- [ ] Add some social features
-- [ ] Mobile applications for Android and iOS
+- Search for runestones by name, location, or other attributes
+- Add runestones to visited list
+- Add photo to visited runestone (forced Creative Commons license)
+- Add collections of runestones, like a "Jarlabanke runestones", "Varganian runestones", "Estrid runestones"
+- Add some gamification
+- Add some social features
+- Mobile applications for Android and iOS
 
 ## Acknowledgments
 

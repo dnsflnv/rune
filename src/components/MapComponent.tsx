@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GeolocateControl, Map, GeoJSONSource } from 'maplibre-gl';
-import { runestonesCache } from '../services/runestonesCache';
 import { supabaseRunestones } from '../services/supabaseRunestones';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
 import { RunestoneModal } from './RunestoneModal';
@@ -30,7 +29,6 @@ interface MapComponentProps {
 export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
-  const moveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const eventListenersAddedRef = useRef<boolean>(false);
   const styleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [runestones, setRunestones] = useState<Runestone[]>([]);
@@ -75,11 +73,11 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     }
   }, [runestones.length]);
 
-  const fetchVisibleRunestones = useCallback(async (bounds: [number, number, number, number]) => {
+  const fetchAllRunestones = useCallback(async () => {
     setLoading(true);
     try {
-      // Try to get data from cache first
-      const cachedData = await runestonesCache.getRunestones(bounds);
+      // Fetch all runestones from the database
+      const allRunestones = await supabaseRunestones.getAllRunestones();
 
       // Fetch visited runestones
       let visitedRunestones: Runestone[] = [];
@@ -93,7 +91,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
       const visitedIds = new Set(visitedRunestones.map((rs) => rs.id));
 
       // Merge visited status with runestone data
-      const runestonesWithVisitedStatus = cachedData.map((runestone) => ({
+      const runestonesWithVisitedStatus = allRunestones.map((runestone) => ({
         ...runestone,
         visited: visitedIds.has(runestone.id),
       }));
@@ -105,19 +103,6 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
       setLoading(false);
     }
   }, []);
-
-  const debouncedFetchVisibleRunestones = useCallback(
-    (bounds: [number, number, number, number]) => {
-      if (moveTimeoutRef.current) {
-        clearTimeout(moveTimeoutRef.current);
-      }
-
-      moveTimeoutRef.current = setTimeout(() => {
-        fetchVisibleRunestones(bounds);
-      }, 300); // 300ms debounce
-    },
-    [fetchVisibleRunestones]
-  );
 
   const createGeoJSONData = useCallback((stones: Runestone[]): RunestoneGeoJSON => {
     // Check for and remove duplicates based on id
@@ -408,9 +393,6 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     if (!mapContainer.current) return;
 
     const initMap = async () => {
-      // Ensure cache is initialized before creating the map
-      await runestonesCache.ensureCacheInitialized();
-
       const map = new Map({
         container: mapContainer.current!,
         center: [18.0686, 59.4293], // Jarlabanke bridge
@@ -420,30 +402,9 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
 
       mapRef.current = map;
 
-      // Fetch runestones when map loads initially
+      // Fetch all runestones when map loads initially
       map.on('load', () => {
-        const bounds = map.getBounds();
-        // Smaller expansion for better performance
-        const expandedBounds: [number, number, number, number] = [
-          bounds.getWest() - 0.1, // Smaller expansion (~11km)
-          bounds.getSouth() - 0.1,
-          bounds.getEast() + 0.1,
-          bounds.getNorth() + 0.1,
-        ];
-        fetchVisibleRunestones(expandedBounds);
-      });
-
-      // Debounced fetch on map move
-      map.on('moveend', () => {
-        const bounds = map.getBounds();
-        // Smaller expansion for better performance
-        const expandedBounds: [number, number, number, number] = [
-          bounds.getWest() - 0.1,
-          bounds.getSouth() - 0.1,
-          bounds.getEast() + 0.1,
-          bounds.getNorth() + 0.1,
-        ];
-        debouncedFetchVisibleRunestones(expandedBounds);
+        fetchAllRunestones();
       });
 
       map.addControl(
@@ -459,9 +420,6 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     initMap();
 
     return () => {
-      if (moveTimeoutRef.current) {
-        clearTimeout(moveTimeoutRef.current);
-      }
       if (styleTimeoutRef.current) {
         clearTimeout(styleTimeoutRef.current);
       }
@@ -469,7 +427,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
         mapRef.current.remove();
       }
     };
-  }, [debouncedFetchVisibleRunestones, fetchVisibleRunestones]);
+  }, [fetchAllRunestones]);
 
   // Update clusters when runestones change
   useEffect(() => {
