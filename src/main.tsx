@@ -38,7 +38,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: '/stones',
+    path: '/runestones',
     children: [
       {
         index: true,

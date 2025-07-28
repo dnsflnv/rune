@@ -94,7 +94,7 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-bold text-gray-800">{runestone.signature_text}</h2>
               <Link
-                to={`/stones/${runestone.slug}`}
+                to={`/runestones/${runestone.slug}`}
                 className="text-primary hover:text-primary/90 text-sm font-medium"
                 onClick={onClose}
               >
