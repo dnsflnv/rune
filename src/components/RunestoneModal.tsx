@@ -1,7 +1,8 @@
 import { Runestone } from '../types';
 import { supabaseRunestones } from '../services/supabaseRunestones';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { authService } from '../services/auth';
+import { Link } from 'react-router-dom';
 
 interface RunestoneModalProps {
   runestone: Runestone | null;
@@ -17,7 +18,7 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
   const [isCheckingVisited, setIsCheckingVisited] = useState(false);
   const [authUser, setAuthUser] = useState(() => authService.getUser());
 
-  const checkVisitedStatus = useCallback(async () => {
+  const checkVisitedStatus = async () => {
     if (!runestone) return;
     setIsCheckingVisited(true);
     try {
@@ -29,7 +30,7 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
     } finally {
       setIsCheckingVisited(false);
     }
-  }, [runestone]);
+  };
 
   useEffect(() => {
     if (isOpen && runestone) {
@@ -82,15 +83,24 @@ export const RunestoneModal = ({ runestone, isOpen, onClose, onVisitedStatusChan
   return (
     <>
       {/* Backdrop - dark overlay behind the modal */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000]" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/50 z-1000" onClick={onClose} />
 
       {/* Modal container */}
-      <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-1001 flex items-center justify-center p-4">
         {/* Modal content */}
         <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-800">{runestone.signature_text}</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-bold text-gray-800">{runestone.signature_text}</h2>
+              <Link
+                to={`/stones/${runestone.slug}`}
+                className="text-primary hover:text-primary/90 text-sm font-medium"
+                onClick={onClose}
+              >
+                View Full Page
+              </Link>
+            </div>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl font-bold">
               ×
             </button>
