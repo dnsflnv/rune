@@ -13,6 +13,7 @@ export const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalRunestones, setTotalRunestones] = useState(0);
+  const [visitedRunestoneDetails, setVisitedRunestoneDetails] = useState<Runestone[]>([]);
 
   // Poll for auth state changes (same as AuthWidget)
   useEffect(() => {
@@ -47,6 +48,17 @@ export const Profile = () => {
         // Load visited runestones
         const visited = await supabaseRunestones.getAllVisitedRunestones();
         setVisitedRunestones(visited);
+
+        // Load full details for visited runestones
+        if (visited.length > 0) {
+          const allRunestones = await supabaseRunestones.getAllRunestones();
+          const visitedDetails = allRunestones.filter((runestone) =>
+            visited.some((visited) => visited.id === runestone.id)
+          );
+          setVisitedRunestoneDetails(visitedDetails);
+        } else {
+          setVisitedRunestoneDetails([]);
+        }
 
         // Load total runestones count
         const allRunestones = await supabaseRunestones.getAllRunestones();
@@ -318,6 +330,74 @@ export const Profile = () => {
                     style={{ width: `${completionPercentage}%` }}
                   ></div>
                 </div>
+              </div>
+
+              {/* Visited Runestones List */}
+              <div className="bg-gray-50 rounded-lg p-6 mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">Visited Runestones</h3>
+                  <span className="text-sm text-gray-500">
+                    {visitedRunestoneDetails.length} runestone{visitedRunestoneDetails.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+
+                {visitedRunestoneDetails.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="text-gray-400 mb-4">
+                      <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-gray-600">You haven't visited any runestones yet.</p>
+                    <p className="text-sm text-gray-500 mt-1">Start exploring to see your visited runestones here!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {visitedRunestoneDetails.map((runestone) => (
+                      <div
+                        key={runestone.id}
+                        className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-lg font-medium text-gray-900 truncate">{runestone.signature_text}</h4>
+                            <p className="text-sm text-gray-500 mt-1">{runestone.found_location}</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {runestone.parish}, {runestone.municipality}
+                            </p>
+                          </div>
+                          <div className="shrink-0 ml-4">
+                            <Link
+                              to={`/stones/${runestone.slug}`}
+                              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                            >
+                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                />
+                              </svg>
+                              View
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <div className="bg-gray-50 px-6 py-4">
