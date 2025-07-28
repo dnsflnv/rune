@@ -37,3 +37,6 @@ logfile
 # Cloudflare
 .wrangler
 .dev.vars*
+
+#Cursor
+.cursor
