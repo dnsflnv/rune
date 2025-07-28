@@ -5,7 +5,27 @@ import { cloudflare } from '@cloudflare/vite-plugin';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), cloudflare()],
+  plugins: [
+    react({
+      babel: {
+        plugins: [
+          [
+            'babel-plugin-react-compiler',
+            {
+              logger: {
+                logEvent(filename: string, event: { kind: string }) {
+                  if (event.kind === 'CompileSuccess') {
+                    console.log('Compiled:', filename);
+                  }
+                },
+              },
+            },
+          ],
+        ],
+      },
+    }),
+    cloudflare(),
+  ],
   build: {
     target: 'esnext',
     rollupOptions: {

@@ -1,6 +1,6 @@
 # Runestone Safari
 
-_Version 0.7_
+_Version 0.8_
 
 [https://runestonesafari.com/](https://runestonesafari.com/)
 
@@ -18,8 +18,10 @@ Runestone Safari is an interactive map application that allows you to explore Sw
 ## Technology Stack
 
 - Devbox and nix package manager for project setup
-- React 19 with TypeScript
-- React Router for routing
+- Typescript
+- React 19
+- React Compiler
+- React Router
 - MapLibre GL for interactive mapping and clustering
 - Supabase for real-time PostgreSQL database and Supabase Storage for photos
 - IDB for offline caching
