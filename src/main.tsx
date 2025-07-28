@@ -8,31 +8,46 @@ import { About } from './pages/about';
 import { Privacy } from './pages/privacy';
 import { License } from './pages/license';
 import { Profile } from './pages/profile';
+import Runestone from './pages/runestone';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Root />,
+    Component: Root,
     errorElement: <ErrorPage />,
   },
   {
     path: '/about',
-    element: <About />,
+    Component: About,
     errorElement: <ErrorPage />,
   },
   {
     path: '/privacy',
-    element: <Privacy />,
+    Component: Privacy,
     errorElement: <ErrorPage />,
   },
   {
     path: '/license',
-    element: <License />,
+    Component: License,
     errorElement: <ErrorPage />,
   },
   {
     path: '/profile',
-    element: <Profile />,
+    Component: Profile,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: '/stones',
+    children: [
+      {
+        index: true,
+        Component: Runestone,
+      },
+      {
+        path: ':slug',
+        Component: Runestone,
+      },
+    ],
     errorElement: <ErrorPage />,
   },
 ]);

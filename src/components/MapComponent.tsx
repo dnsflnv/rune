@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { GeolocateControl, Map, GeoJSONSource } from 'maplibre-gl';
 import { supabaseRunestones } from '../services/supabaseRunestones';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
@@ -51,7 +51,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
   };
 
   // Function to refresh visited status
-  const refreshVisitedStatus = async () => {
+  const refreshVisitedStatus = useCallback(async () => {
     if (runestones.length === 0) return;
 
     try {
@@ -71,9 +71,9 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     } catch (error) {
       console.error('Error refreshing visited status:', error);
     }
-  };
+  }, [runestones.length]);
 
-  const fetchAllRunestones = async () => {
+  const fetchAllRunestones = useCallback(async () => {
     setLoading(true);
     try {
       // Fetch all runestones from the database
@@ -102,9 +102,9 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const createGeoJSONData = (stones: Runestone[]): RunestoneGeoJSON => {
+  const createGeoJSONData = useCallback((stones: Runestone[]): RunestoneGeoJSON => {
     // Check for and remove duplicates based on id
     const uniqueStones = stones.filter((stone, index, arr) => arr.findIndex((s) => s.id === stone.id) === index);
 
@@ -156,9 +156,9 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
       type: 'FeatureCollection',
       features,
     };
-  };
+  }, []);
 
-  const updateClusters = () => {
+  const updateClusters = useCallback(() => {
     if (!mapRef.current) return;
 
     const map = mapRef.current;
@@ -387,7 +387,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     } catch (error) {
       console.error('Error adding clustering layers:', error);
     }
-  };
+  }, [runestones, createGeoJSONData]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -439,7 +439,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
 
       return () => clearTimeout(timer);
     }
-  }, [runestones.length]);
+  }, [updateClusters, runestones.length]);
 
   useEffect(() => {
     if (onVisitedCountChange) {
@@ -454,7 +454,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
 
       {/* Loading indicator */}
       {loading && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg shadow-lg z-1001">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg shadow-lg z-[1001]">
           <div className="flex items-center gap-3">
             <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></div>
             <span className="text-sm font-medium text-gray-700">Loading runestones...</span>
