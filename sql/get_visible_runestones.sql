@@ -24,7 +24,8 @@ BEGIN
         tt.value as transliteration,
         m.lost,
         m.ornamental,
-        m.recent
+        m.recent,
+        s.slug
       FROM meta_information m
       LEFT JOIN signatures s ON m.signature_id = s.id
       LEFT JOIN material_types mt ON m.materialType_id = mt.id
