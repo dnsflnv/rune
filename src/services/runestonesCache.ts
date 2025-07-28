@@ -2,12 +2,15 @@ import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { supabaseRunestones } from './supabaseRunestones';
 import { Runestone } from '../types';
 
+const TOTAL_RUNESTONES = 6815;
+
 interface RunestonesDB extends DBSchema {
   runestones: {
     key: number;
     value: Runestone;
     indexes: {
       'by-coordinates': [number, number];
+      'by-slug': string;
     };
   };
 }
@@ -24,10 +27,11 @@ class RunestonesCache {
   }
 
   private async initDB() {
-    return openDB<RunestonesDB>('runestones-cache', 1, {
+    return openDB<RunestonesDB>('runestones-cache', 2, {
       upgrade(db) {
         const store = db.createObjectStore('runestones', { keyPath: 'id' });
         store.createIndex('by-coordinates', ['latitude', 'longitude']);
+        store.createIndex('by-slug', ['slug']);
       },
     });
   }
@@ -40,7 +44,7 @@ class RunestonesCache {
     // Check if we already have data in the cache
     const existingData = await db.count('runestones');
 
-    if (existingData === 0) {
+    if (existingData < TOTAL_RUNESTONES) {
       try {
         // Load all runestones from Supabase without bounds restriction
         const allRunestones = await supabaseRunestones.getAllRunestones();

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GeolocateControl, Map, GeoJSONSource } from 'maplibre-gl';
 import { supabaseRunestones } from '../services/supabaseRunestones';
+import { runestonesCache } from '../services/runestonesCache';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
 import { RunestoneModal } from './RunestoneModal';
 
@@ -76,8 +77,8 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
   const fetchAllRunestones = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch all runestones from the database
-      const allRunestones = await supabaseRunestones.getAllRunestones();
+      // Fetch all runestones from IDB cache (which will fall back to Supabase if needed)
+      const allRunestones = await runestonesCache.getRunestones([-180, -90, 180, 90]); // Global bounds
 
       // Fetch visited runestones
       let visitedRunestones: Runestone[] = [];
