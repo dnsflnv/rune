@@ -1,15 +1,16 @@
 # Runestone Safari
 
-_Version 0.9_
+_Version 0.10_
 
 [https://runestonesafari.com/](https://runestonesafari.com/)
 
-Runestone Safari is an interactive map application that allows you to explore Swedish runestones and ancient heritage sites.
+Runestone Safari is an interactive map application that allows you to explore Swedish runestones.
 
 ## Features
 
 - Interactive clustering map with 6,815+ runestones
 - Offline caching of runestones
+- Search for runestones by name, location, or other attributes
 - Detailed information about each runestone
 - User authentication (not required)
 - User profile page
@@ -23,6 +24,7 @@ Runestone Safari is an interactive map application that allows you to explore Sw
 - React 19
 - React Compiler
 - React Router
+- MobX State management
 - MapLibre GL for interactive mapping and clustering
 - Supabase for real-time PostgreSQL database and Supabase Storage for photos
 - IDB for offline caching
@@ -39,7 +41,6 @@ Runestone Safari is an interactive map application that allows you to explore Sw
 
 ## Roadmap
 
-- Search for runestones by name, location, or other attributes
 - Add photo to visited runestone (forced Creative Commons license)
 - Add collections of runestones, like a "Jarlabanke runestones", "Varganian runestones", "Estrid runestones"
 - Add some gamification
