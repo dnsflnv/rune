@@ -28,7 +28,7 @@ export const Sidebar = observer(({ visitedCount, visible = false, onClose }: Sid
         ${visible ? 'translate-x-0' : '-translate-x-full'}
         md:static md:translate-x-0
       `}
-      style={{ boxShadow: visible && isMobile ? '0 0 0 9999px rgba(0,0,0,0.0)' : undefined }}
+      style={{ boxShadow: visible && isMobile ? '0 0 0 9999px rgba(0,0,0,0.5)' : undefined }}
       aria-label="Sidebar"
     >
       {/* Close button for mobile */}
