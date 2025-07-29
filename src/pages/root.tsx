@@ -18,13 +18,6 @@ export const Root = () => {
         </svg>
       </button>
       <div className="flex h-full">
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-30 z-20 md:hidden"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Close sidebar overlay"
-          />
-        )}
         <Sidebar visitedCount={visitedCount} visible={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex-1 relative">
           <MapComponent onVisitedCountChange={setVisitedCount} />
