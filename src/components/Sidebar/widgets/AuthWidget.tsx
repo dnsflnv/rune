@@ -74,6 +74,13 @@ export const AuthWidget = observer(() => {
     }
   };
 
+  const handleToggleSignUp = () => {
+    setIsSignUp(!isSignUp);
+    setCaptchaToken(null); // Reset captcha when switching modes
+    setError(null);
+    setSuccess(null);
+  };
+
   if (authStore.loading) {
     return <div className="p-4 text-sm text-gray-500">Loading...</div>;
   }
@@ -213,23 +220,25 @@ export const AuthWidget = observer(() => {
         </div>
         {error && <div className="text-sm text-red-500">{error}</div>}
         {success && <div className="text-sm text-green-500">{success}</div>}
-        <Turnstile
-          siteKey={import.meta.env.VITE_TURNSTILE_SITEKEY || ''}
-          onSuccess={(token) => setCaptchaToken(token)}
-        />
+        <div className="w-full flex justify-center">
+          <Turnstile
+            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ''}
+            onSuccess={(token) => setCaptchaToken(token)}
+            onError={() => setError('Captcha verification failed. Please try again.')}
+            options={{
+              size: 'compact',
+            }}
+          />
+        </div>
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !captchaToken}
           className="w-full px-3 py-2 text-sm text-white bg-primary rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
         </button>
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="w-full text-sm text-primary hover:underline"
-          >
+          <button type="button" onClick={handleToggleSignUp} className="w-full text-sm text-primary hover:underline">
             {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}
           </button>
           <button
