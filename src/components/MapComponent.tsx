@@ -56,7 +56,7 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
 
   // Function to refresh visited status
   const refreshVisitedStatus = useCallback(async () => {
-    if (runestones.length === 0 || !authStore.user) return;
+    if (!authStore.user) return;
 
     try {
       // Fetch visited runestones
@@ -75,7 +75,7 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
     } catch (error) {
       console.error('Error refreshing visited status:', error);
     }
-  }, [runestones.length]);
+  }, []);
 
   const fetchAllRunestones = useCallback(async () => {
     setLoading(true);
@@ -85,7 +85,7 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
 
       // Fetch visited runestones only if user is logged in
       let visitedRunestones: Runestone[] = [];
-      if (authStore.user) {
+      if (authStore.user && !authStore.loading) {
         try {
           visitedRunestones = await supabaseRunestones.getAllVisitedRunestones();
         } catch (error) {
@@ -108,7 +108,7 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
     } finally {
       setLoading(false);
     }
-  }, [authStore.user]);
+  }, [authStore.user, authStore.loading]);
 
   const createGeoJSONData = useCallback((stones: Runestone[]): RunestoneGeoJSON => {
     // Check for and remove duplicates based on id
@@ -447,28 +447,18 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
     }
   }, [updateClusters, runestones.length]);
 
-  // Refresh visited status when authentication state changes
+  // Handle authentication state changes
   useEffect(() => {
-    if (runestones.length > 0 && !authStore.loading) {
-      refreshVisitedStatus();
-    }
-  }, [authStore.user, authStore.loading, runestones.length, refreshVisitedStatus]);
+    if (authStore.loading) return; // Don't do anything while auth is loading
 
-  // Immediately refresh visited status when user logs in
-  useEffect(() => {
-    if (authStore.user && runestones.length > 0 && !authStore.loading) {
-      // Small delay to ensure auth state is fully settled
+    if (authStore.user && runestones.length > 0) {
+      // User logged in and we have runestones - refresh visited status with a small delay
       const timer = setTimeout(() => {
         refreshVisitedStatus();
-      }, 100);
+      }, 200); // Small delay to ensure auth state is fully settled
       return () => clearTimeout(timer);
-    }
-  }, [authStore.user, runestones.length, authStore.loading, refreshVisitedStatus]);
-
-  // Clear visited status when user logs out
-  useEffect(() => {
-    if (runestones.length > 0 && !authStore.user && !authStore.loading) {
-      // When user logs out, mark all runestones as unvisited
+    } else if (!authStore.user && runestones.length > 0) {
+      // User logged out - mark all runestones as unvisited
       setRunestones((prevRunestones) =>
         prevRunestones.map((runestone) => ({
           ...runestone,
@@ -476,14 +466,14 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
         }))
       );
     }
-  }, [authStore.user, authStore.loading, runestones.length]);
+  }, [authStore.user, authStore.loading, runestones.length, refreshVisitedStatus]);
 
-  // Refetch runestones when authentication state changes (to get visited status)
+  // Refetch runestones when auth loading state changes (in case user was already logged in)
   useEffect(() => {
-    if (!authStore.loading && runestones.length > 0) {
+    if (!authStore.loading && runestones.length === 0) {
       fetchAllRunestones();
     }
-  }, [authStore.user, authStore.loading, fetchAllRunestones]);
+  }, [authStore.loading, runestones.length, fetchAllRunestones]);
 
   useEffect(() => {
     if (onVisitedCountChange) {
