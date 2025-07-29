@@ -32,20 +32,26 @@ class AuthStore {
     this.loading = loading;
   }
 
-  async signIn(email: string, password: string) {
+  async signIn(email: string, password: string, captchaToken: string | null) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: {
+        captchaToken: captchaToken || undefined,
+      },
     });
     if (error) throw error;
     this.setUser(data.user);
     return data;
   }
 
-  async signUp(email: string, password: string) {
+  async signUp(email: string, password: string, captchaToken: string | null) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        captchaToken: captchaToken || undefined,
+      },
     });
     if (error) throw error;
     this.setUser(data.user);

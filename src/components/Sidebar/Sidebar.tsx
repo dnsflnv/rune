@@ -46,8 +46,8 @@ export const Sidebar = observer(({ visitedCount, visible = false, onClose }: Sid
       <div className="flex-1 min-h-0 flex flex-col">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-primary">Runestone Safari β</h1>
-          <p className="text-sm text-gray-600 mt-1">Explore Swedish heritage</p>
+          <h1 className="text-xl font-bold text-primary">Runestone Safari</h1>
+          <p className="text-sm text-gray-600 mt-1">Explore Swedish runestones</p>
         </div>
         {/* Search Widget */}
         <SearchWidget />

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { authStore } from '../../../stores/authStore';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export const AuthWidget = observer(() => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -11,6 +12,7 @@ export const AuthWidget = observer(() => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,9 +22,9 @@ export const AuthWidget = observer(() => {
 
     try {
       if (isSignUp) {
-        await authStore.signUp(email, password);
+        await authStore.signUp(email, password, captchaToken);
       } else {
-        await authStore.signIn(email, password);
+        await authStore.signIn(email, password, captchaToken);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -211,6 +213,10 @@ export const AuthWidget = observer(() => {
         </div>
         {error && <div className="text-sm text-red-500">{error}</div>}
         {success && <div className="text-sm text-green-500">{success}</div>}
+        <Turnstile
+          siteKey={import.meta.env.VITE_TURNSTILE_SITEKEY || ''}
+          onSuccess={(token) => setCaptchaToken(token)}
+        />
         <button
           type="submit"
           disabled={loading}
