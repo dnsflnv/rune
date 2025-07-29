@@ -237,7 +237,7 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
         type: 'geojson',
         data: geoJsonData,
         cluster: true,
-        clusterMaxZoom: 14, // Max zoom to cluster points on
+        clusterMaxZoom: 13, // Max zoom to cluster points on
         clusterRadius: 50, // Radius of each cluster when clustering points (defaults to 50)
       });
 
