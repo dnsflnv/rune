@@ -1,7 +1,8 @@
 import { Runestone } from '../types';
 import { supabaseRunestones } from '../services/supabaseRunestones';
 import { useState, useEffect } from 'react';
-import { authService } from '../services/auth';
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../stores/authStore';
 import { PageHeader } from './PageHeader';
 import { MiniMap } from './MiniMap';
 
@@ -10,12 +11,11 @@ interface RunestonePageProps {
   onVisitedStatusChange?: () => void;
 }
 
-export const RunestonePage = ({ runestone, onVisitedStatusChange }: RunestonePageProps) => {
+export const RunestonePage = observer(({ runestone, onVisitedStatusChange }: RunestonePageProps) => {
   const [isMarkingVisited, setIsMarkingVisited] = useState(false);
   const [visitedError, setVisitedError] = useState<string | null>(null);
   const [isVisited, setIsVisited] = useState(false);
   const [isCheckingVisited, setIsCheckingVisited] = useState(false);
-  const [authUser, setAuthUser] = useState(() => authService.getUser());
 
   const checkVisitedStatus = async () => {
     if (!runestone) return;
@@ -37,13 +37,15 @@ export const RunestonePage = ({ runestone, onVisitedStatusChange }: RunestonePag
     }
   }, [runestone]);
 
+  // Refresh visited status when authentication state changes
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newUser = authService.getUser();
-      setAuthUser((prev) => (prev !== newUser ? newUser : prev));
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
+    if (runestone && authStore.user) {
+      checkVisitedStatus();
+    } else if (!authStore.user) {
+      // Clear visited status when user logs out
+      setIsVisited(false);
+    }
+  }, [authStore.user, runestone]);
 
   // If no runestone, show loading or error
   if (!runestone) {
@@ -120,7 +122,7 @@ export const RunestonePage = ({ runestone, onVisitedStatusChange }: RunestonePag
                 </div>
 
                 {/* Visit Status */}
-                {authUser && (
+                {authStore.user && (
                   <div>
                     <h3 className="font-semibold text-primary-700 mb-3 text-lg">Visit Status</h3>
                     <div className="bg-gray-50 p-4 rounded-lg">
@@ -251,4 +253,4 @@ export const RunestonePage = ({ runestone, onVisitedStatusChange }: RunestonePag
       </div>
     </div>
   );
-};
+});

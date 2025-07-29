@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { authService } from '../../../services/auth';
+import { useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../../../stores/authStore';
 
-export const AuthWidget = () => {
+export const AuthWidget = observer(() => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [isMagicLink, setIsMagicLink] = useState(false);
@@ -10,18 +11,6 @@ export const AuthWidget = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [authUser, setAuthUser] = useState(() => authService.getUser());
-  const [authLoading, setAuthLoading] = useState(() => authService.isLoading());
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const newUser = authService.getUser();
-      const newLoading = authService.isLoading();
-      setAuthUser((prev) => (prev !== newUser ? newUser : prev));
-      setAuthLoading((prev) => (prev !== newLoading ? newLoading : prev));
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,9 +20,9 @@ export const AuthWidget = () => {
 
     try {
       if (isSignUp) {
-        await authService.signUp(email, password);
+        await authStore.signUp(email, password);
       } else {
-        await authService.signIn(email, password);
+        await authStore.signIn(email, password);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -49,7 +38,7 @@ export const AuthWidget = () => {
     setLoading(true);
 
     try {
-      await authService.signInWithMagicLink(email);
+      await authStore.signInWithMagicLink(email);
       setSuccess('Check your email for the magic link');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -65,7 +54,7 @@ export const AuthWidget = () => {
     setLoading(true);
 
     try {
-      await authService.resetPassword(email);
+      await authStore.resetPassword(email);
       setSuccess('Password reset instructions have been sent to your email');
       setIsForgotPassword(false);
     } catch (err) {
@@ -77,21 +66,21 @@ export const AuthWidget = () => {
 
   const handleSignOut = async () => {
     try {
-      await authService.signOut();
+      await authStore.signOut();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
-  if (authLoading) {
+  if (authStore.loading) {
     return <div className="p-4 text-sm text-gray-500">Loading...</div>;
   }
 
-  if (authUser) {
+  if (authStore.user) {
     return (
       <div className="p-4 border-t border-gray-200">
         <div className="text-sm text-gray-600 mb-2">
-          Signed in as <span className="font-medium">{authUser.email}</span>
+          Signed in as <span className="font-medium">{authStore.user.email}</span>
         </div>
         <div className="space-y-2">
           <a
@@ -255,4 +244,4 @@ export const AuthWidget = () => {
       </form>
     </div>
   );
-};
+});

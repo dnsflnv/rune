@@ -1,6 +1,6 @@
 # Runestone Safari
 
-_Version 0.8_
+_Version 0.9_
 
 [https://runestonesafari.com/](https://runestonesafari.com/)
 

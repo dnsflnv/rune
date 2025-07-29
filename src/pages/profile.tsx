@@ -1,30 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { authService } from '../services/auth';
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../stores/authStore';
 import { supabaseRunestones } from '../services/supabaseRunestones';
 import { Runestone } from '../types';
-import { User } from '@supabase/supabase-js';
 import { PageHeader } from '../components/PageHeader';
 
-export const Profile = () => {
-  const [user, setUser] = useState<User | null>(() => authService.getUser());
-  const [authLoading, setAuthLoading] = useState(() => authService.isLoading());
+export const Profile = observer(() => {
   const [visitedRunestones, setVisitedRunestones] = useState<Runestone[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalRunestones, setTotalRunestones] = useState(0);
   const [visitedRunestoneDetails, setVisitedRunestoneDetails] = useState<Runestone[]>([]);
-
-  // Poll for auth state changes (same as AuthWidget)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const newUser = authService.getUser();
-      const newLoading = authService.isLoading();
-      setUser((prev) => (prev !== newUser ? newUser : prev));
-      setAuthLoading((prev) => (prev !== newLoading ? newLoading : prev));
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -33,12 +20,12 @@ export const Profile = () => {
         setError(null);
 
         // Wait for auth to be initialized
-        if (authLoading) {
+        if (authStore.loading) {
           return;
         }
 
         // Get current user
-        const currentUser = authService.getUser();
+        const currentUser = authStore.user;
         if (!currentUser) {
           setError('You must be logged in to view your profile');
           setLoading(false);
@@ -72,7 +59,7 @@ export const Profile = () => {
     };
 
     loadProfileData();
-  }, [authLoading, user]);
+  }, [authStore.loading, authStore.user]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -83,7 +70,7 @@ export const Profile = () => {
   };
 
   // Show loading while auth is initializing
-  if (authLoading) {
+  if (authStore.loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <PageHeader title="Profile" />
@@ -166,7 +153,7 @@ export const Profile = () => {
     );
   }
 
-  if (!user) {
+  if (!authStore.user) {
     return (
       <div className="min-h-screen bg-gray-50">
         <PageHeader title="Profile" />
@@ -226,19 +213,19 @@ export const Profile = () => {
                   <div className="shrink-0">
                     <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
                       <span className="text-white text-xl font-semibold">
-                        {user.email?.charAt(0).toUpperCase() || 'U'}
+                        {authStore.user.email?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-xl font-semibold text-gray-900">{user.email}</h2>
+                    <h2 className="text-xl font-semibold text-gray-900">{authStore.user.email}</h2>
                     <p className="text-sm text-gray-500">
-                      Member since {user.created_at ? formatDate(user.created_at) : 'Unknown'}
+                      Member since {authStore.user.created_at ? formatDate(authStore.user.created_at) : 'Unknown'}
                     </p>
                   </div>
                   <div className="shrink-0">
                     <button
-                      onClick={() => authService.signOut()}
+                      onClick={() => authStore.signOut()}
                       className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                     >
                       <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -418,4 +405,4 @@ export const Profile = () => {
       </div>
     </div>
   );
-};
+});
