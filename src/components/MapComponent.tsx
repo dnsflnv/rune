@@ -4,6 +4,8 @@ import { supabaseRunestones } from '../services/supabaseRunestones';
 import { runestonesCache } from '../services/runestonesCache';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
 import { RunestoneModal } from './RunestoneModal';
+import { observer } from 'mobx-react-lite';
+import { authStore } from '../stores/authStore';
 
 // Cluster styling constants
 const CLUSTER_COLORS = {
@@ -27,7 +29,7 @@ interface MapComponentProps {
   onVisitedCountChange?: (count: number) => void;
 }
 
-export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
+export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const eventListenersAddedRef = useRef<boolean>(false);
@@ -53,7 +55,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
 
   // Function to refresh visited status
   const refreshVisitedStatus = useCallback(async () => {
-    if (runestones.length === 0) return;
+    if (runestones.length === 0 || !authStore.user) return;
 
     try {
       // Fetch visited runestones
@@ -80,12 +82,14 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
       // Fetch all runestones from IDB cache (which will fall back to Supabase if needed)
       const allRunestones = await runestonesCache.getAllRunestones();
 
-      // Fetch visited runestones
+      // Fetch visited runestones only if user is logged in
       let visitedRunestones: Runestone[] = [];
-      try {
-        visitedRunestones = await supabaseRunestones.getAllVisitedRunestones();
-      } catch (error) {
-        console.error('Error fetching visited runestones:', error);
+      if (authStore.user) {
+        try {
+          visitedRunestones = await supabaseRunestones.getAllVisitedRunestones();
+        } catch (error) {
+          console.error('Error fetching visited runestones:', error);
+        }
       }
 
       // Create a set of visited runestone IDs for quick lookup
@@ -103,7 +107,7 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authStore.user]);
 
   const createGeoJSONData = useCallback((stones: Runestone[]): RunestoneGeoJSON => {
     // Check for and remove duplicates based on id
@@ -442,6 +446,44 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
     }
   }, [updateClusters, runestones.length]);
 
+  // Refresh visited status when authentication state changes
+  useEffect(() => {
+    if (runestones.length > 0 && !authStore.loading) {
+      refreshVisitedStatus();
+    }
+  }, [authStore.user, authStore.loading, runestones.length, refreshVisitedStatus]);
+
+  // Immediately refresh visited status when user logs in
+  useEffect(() => {
+    if (authStore.user && runestones.length > 0 && !authStore.loading) {
+      // Small delay to ensure auth state is fully settled
+      const timer = setTimeout(() => {
+        refreshVisitedStatus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [authStore.user, runestones.length, authStore.loading, refreshVisitedStatus]);
+
+  // Clear visited status when user logs out
+  useEffect(() => {
+    if (runestones.length > 0 && !authStore.user && !authStore.loading) {
+      // When user logs out, mark all runestones as unvisited
+      setRunestones((prevRunestones) =>
+        prevRunestones.map((runestone) => ({
+          ...runestone,
+          visited: false,
+        }))
+      );
+    }
+  }, [authStore.user, authStore.loading, runestones.length]);
+
+  // Refetch runestones when authentication state changes (to get visited status)
+  useEffect(() => {
+    if (!authStore.loading && runestones.length > 0) {
+      fetchAllRunestones();
+    }
+  }, [authStore.user, authStore.loading, fetchAllRunestones]);
+
   useEffect(() => {
     if (onVisitedCountChange) {
       const visitedCount = runestones.filter((runestone) => runestone.visited).length;
@@ -472,4 +514,4 @@ export const MapComponent = ({ onVisitedCountChange }: MapComponentProps) => {
       />
     </div>
   );
-};
+});
