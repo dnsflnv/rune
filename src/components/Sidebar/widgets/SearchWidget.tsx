@@ -77,8 +77,7 @@ export const SearchWidget = observer(() => {
                     key={runestone.id}
                     className="p-2 text-sm bg-gray-50 rounded cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => {
-                      // TODO: Navigate to runestone or show on map
-                      console.log('Selected runestone:', runestone);
+                      searchStore.setSelectedRunestone(runestone);
                     }}
                   >
                     <div className="font-medium">{runestone.signature_text}</div>

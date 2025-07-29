@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite';
 import { AuthWidget } from './widgets/AuthWidget';
 import { SearchWidget } from './widgets/SearchWidget';
 import { authStore } from '../../stores/authStore';
+import { Link } from 'react-router';
 
 // Cluster styling constants (matching MapComponent)
 const CLUSTER_COLORS = {
@@ -54,7 +55,9 @@ export const Sidebar = observer(({ visitedCount, visible = false, onClose }: Sid
         {authStore.user && (
           <div className="p-4 border-t border-gray-200">
             <div className="text-sm text-gray-600 text-center">
-              <span className="font-medium text-primary">{visitedCount}</span> visited runestones
+              <Link to="/profile" className="hover:underline">
+                <span className="font-medium text-primary">{visitedCount}</span> visited runestones
+              </Link>
             </div>
           </div>
         )}

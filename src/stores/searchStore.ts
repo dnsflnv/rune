@@ -7,6 +7,7 @@ class SearchStore {
   searchResults: Runestone[] = [];
   isLoading: boolean = false;
   hasSearched: boolean = false;
+  selectedRunestone: Runestone | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -26,6 +27,10 @@ class SearchStore {
 
   setHasSearched(searched: boolean) {
     this.hasSearched = searched;
+  }
+
+  setSelectedRunestone(runestone: Runestone | null) {
+    this.selectedRunestone = runestone;
   }
 
   async performSearch(query: string) {
@@ -56,6 +61,7 @@ class SearchStore {
     this.setSearchQuery('');
     this.setSearchResults([]);
     this.setHasSearched(false);
+    this.setSelectedRunestone(null);
   }
 
   get hasResults() {
