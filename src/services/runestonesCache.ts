@@ -166,6 +166,63 @@ class RunestonesCache {
 
     return runestone || null;
   }
+
+  async searchRunestones(query: string, limit: number = 100): Promise<Runestone[]> {
+    await this.initializeCache();
+
+    if (!query.trim()) {
+      return [];
+    }
+
+    const searchTerm = query.toLowerCase().trim();
+
+    const db = await this.db;
+
+    // Use cursor to iterate through records efficiently
+    const results: Runestone[] = [];
+    const tx = db.transaction('runestones', 'readonly');
+    const store = tx.objectStore('runestones');
+    let cursor = await store.openCursor();
+
+    let checkedCount = 0;
+    while (cursor && results.length < limit) {
+      const runestone = cursor.value;
+      checkedCount++;
+
+      // Check if any searchable field contains the search term
+      if (this.matchesSearchTerm(runestone, searchTerm)) {
+        results.push(runestone);
+      }
+
+      // Continue to next record
+      cursor = await cursor.continue();
+    }
+
+    return results;
+  }
+
+  private matchesSearchTerm(runestone: Runestone, searchTerm: string): boolean {
+    const searchableFields = [
+      runestone.signature_text,
+      runestone.found_location,
+      runestone.parish,
+      runestone.district,
+      runestone.municipality,
+      runestone.current_location,
+      runestone.material,
+      runestone.material_type,
+      runestone.rune_type,
+      runestone.dating,
+      runestone.style,
+      runestone.carver,
+      runestone.english_translation,
+      runestone.swedish_translation,
+      runestone.norse_text,
+      runestone.transliteration,
+    ];
+
+    return searchableFields.some((field) => field && field.toLowerCase().includes(searchTerm));
+  }
 }
 
 export const runestonesCache = new RunestonesCache();

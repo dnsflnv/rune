@@ -6,6 +6,7 @@ import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
 import { RunestoneModal } from './RunestoneModal';
 import { observer } from 'mobx-react-lite';
 import { authStore } from '../stores/authStore';
+import { searchStore } from '../stores/searchStore';
 
 // Cluster styling constants
 const CLUSTER_COLORS = {
@@ -490,6 +491,24 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
       onVisitedCountChange(visitedCount);
     }
   }, [onVisitedCountChange, runestones]);
+
+  // Navigate to selected runestone
+  useEffect(() => {
+    if (searchStore.selectedRunestone && mapRef.current) {
+      const map = mapRef.current;
+
+      // Fly to the runestone's location
+      map.flyTo({
+        center: [searchStore.selectedRunestone.longitude, searchStore.selectedRunestone.latitude],
+        zoom: 16, // Close zoom to show the runestone clearly
+        duration: 2000, // 2 second animation
+      });
+
+      // Open the modal for the selected runestone
+      openModal(searchStore.selectedRunestone);
+      searchStore.setSelectedRunestone(null); // Clear selected runestone after navigation
+    }
+  }, [searchStore.selectedRunestone]);
 
   return (
     <div className="relative w-full h-full">

@@ -1,4 +1,8 @@
+import { observer } from 'mobx-react-lite';
 import { AuthWidget } from './widgets/AuthWidget';
+import { SearchWidget } from './widgets/SearchWidget';
+import { authStore } from '../../stores/authStore';
+import { Link } from 'react-router';
 
 // Cluster styling constants (matching MapComponent)
 const CLUSTER_COLORS = {
@@ -7,28 +11,13 @@ const CLUSTER_COLORS = {
   LARGE: '#CD853F', // Light brown for clusters with > 750 points
 } as const;
 
-interface MenuItem {
-  key: string;
-  label: string;
-}
-
 interface SidebarProps {
-  activeItem: string;
-  setActiveItem: (key: string) => void;
   visitedCount: number;
-  menuItems: MenuItem[];
   visible?: boolean;
   onClose?: () => void;
 }
 
-export const Sidebar = ({
-  activeItem,
-  setActiveItem,
-  visitedCount,
-  menuItems,
-  visible = false,
-  onClose,
-}: SidebarProps) => {
+export const Sidebar = observer(({ visitedCount, visible = false, onClose }: SidebarProps) => {
   // Helper to detect mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   return (
@@ -60,32 +49,18 @@ export const Sidebar = ({
           <h1 className="text-xl font-bold text-primary">Runestone Safari β</h1>
           <p className="text-sm text-gray-600 mt-1">Explore Swedish heritage</p>
         </div>
-        {/* Navigation Menu (scrollable if needed) */}
-        <nav className="overflow-y-auto">
-          <ul className="py-2">
-            {menuItems.map((item) => (
-              <li key={item.key}>
-                <button
-                  onClick={() => {
-                    setActiveItem(item.key);
-                    if (onClose && window.innerWidth < 768) onClose();
-                  }}
-                  className={`w-full text-left sidebar-item flex items-center gap-3 ${
-                    activeItem === item.key ? 'active' : ''
-                  }`}
-                >
-                  <span className="text-sm font-medium">{item.label}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        {/* Visited Runestone Count */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="text-sm text-gray-600 text-center">
-            <span className="font-medium text-primary">{visitedCount}</span> visited runestones
+        {/* Search Widget */}
+        <SearchWidget />
+        {/* Visited Runestone Count - only show if user is logged in */}
+        {authStore.user && (
+          <div className="p-4 border-t border-gray-200">
+            <div className="text-sm text-gray-600 text-center">
+              <Link to="/profile" className="hover:underline">
+                <span className="font-medium text-primary">{visitedCount}</span> visited runestones
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
         {/* Map Legend */}
         <div className="p-4 border-t border-gray-200">
           <div className="text-xs font-medium text-gray-700 mb-3">Map Legend:</div>
@@ -138,4 +113,4 @@ export const Sidebar = ({
       </div>
     </aside>
   );
-};
+});
