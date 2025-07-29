@@ -36,20 +36,26 @@ class AuthService {
     return AuthService.instance;
   }
 
-  public async signIn(email: string, password: string) {
+  public async signIn(email: string, password: string, captchaToken: string | null) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: {
+        captchaToken: captchaToken || undefined,
+      },
     });
     if (error) throw error;
     this.currentUser = data.user;
     return data;
   }
 
-  public async signUp(email: string, password: string) {
+  public async signUp(email: string, password: string, captchaToken: string | null) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        captchaToken: captchaToken || undefined,
+      },
     });
     if (error) throw error;
     this.currentUser = data.user;
