@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GeolocateControl, Map, GeoJSONSource } from 'maplibre-gl';
-import { supabaseRunestones } from '../services/supabaseRunestones';
 import { runestonesCache } from '../services/runestonesCache';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
 import { RunestoneModal } from './RunestoneModal';
 import { observer } from 'mobx-react-lite';
-import { authStore } from '../stores/authStore';
+
 import { searchStore } from '../stores/searchStore';
+import { visitedRunestonesStore } from '../stores/visitedRunestonesStore';
 
 // Cluster styling constants
 const CLUSTER_COLORS = {
@@ -55,53 +55,12 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
     setSelectedRunestone(null);
   };
 
-  // Helper function to apply visited status to runestones
-  const applyVisitedStatus = useCallback(
-    async (runestones: Runestone[]): Promise<Runestone[]> => {
-      if (!authStore.user || authStore.loading) {
-        // User not logged in or still loading - mark all as unvisited
-        return runestones.map((runestone) => ({
-          ...runestone,
-          visited: false,
-        }));
-      }
-
-      try {
-        // Fetch visited runestones
-        const visitedRunestones = await supabaseRunestones.getAllVisitedRunestones();
-
-        // Create a set of visited runestone IDs for quick lookup
-        const visitedIds = new Set(visitedRunestones.map((rs) => rs.id));
-
-        // Apply visited status to runestones
-        return runestones.map((runestone) => ({
-          ...runestone,
-          visited: visitedIds.has(runestone.id),
-        }));
-      } catch (error) {
-        console.error('Error fetching visited runestones:', error);
-        // On error, return runestones with visited status set to false
-        return runestones.map((runestone) => ({
-          ...runestone,
-          visited: false,
-        }));
-      }
-    },
-    [authStore.user, authStore.loading]
-  );
-
-  // Function to refresh visited status
-  const refreshVisitedStatus = useCallback(async () => {
-    if (!authStore.user) return;
-
-    try {
-      const updatedRunestones = await applyVisitedStatus(runestonesRef.current);
-      runestonesRef.current = updatedRunestones;
-      setRunestones(updatedRunestones);
-    } catch (error) {
-      console.error('Error refreshing visited status:', error);
-    }
-  }, [authStore.user, applyVisitedStatus]);
+  // Function to refresh visited status (now simply applies the current visited state)
+  const refreshVisitedStatus = useCallback(() => {
+    const updatedRunestones = visitedRunestonesStore.applyVisitedStatus(runestonesRef.current);
+    runestonesRef.current = updatedRunestones;
+    setRunestones(updatedRunestones);
+  }, []);
 
   const fetchAllRunestones = useCallback(async () => {
     setLoading(true);
@@ -109,8 +68,8 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
       // Fetch all runestones from IDB cache (which will fall back to Supabase if needed)
       const allRunestones = await runestonesCache.getAllRunestones();
 
-      // Apply visited status to the runestones
-      const runestonesWithVisitedStatus = await applyVisitedStatus(allRunestones);
+      // Apply visited status using the store
+      const runestonesWithVisitedStatus = visitedRunestonesStore.applyVisitedStatus(allRunestones);
 
       runestonesRef.current = runestonesWithVisitedStatus;
       setRunestones(runestonesWithVisitedStatus);
@@ -119,7 +78,7 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
     } finally {
       setLoading(false);
     }
-  }, [applyVisitedStatus]);
+  }, []);
 
   const createGeoJSONData = useCallback((stones: Runestone[]): RunestoneGeoJSON => {
     // Check for and remove duplicates based on id
@@ -458,40 +417,25 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
     }
   }, [updateClusters, runestones.length]);
 
-  // Handle authentication state changes
+  // React to changes in visited runestones store
   useEffect(() => {
-    if (authStore.loading) return; // Don't do anything while auth is loading
-
-    if (authStore.user && runestonesRef.current.length > 0) {
-      // User logged in and we have runestones - refresh visited status with a small delay
-      const timer = setTimeout(() => {
-        refreshVisitedStatus();
-      }, 200); // Small delay to ensure auth state is fully settled
-      return () => clearTimeout(timer);
-    } else if (!authStore.user && runestonesRef.current.length > 0) {
-      // User logged out - mark all runestones as unvisited
-      const unvisitedRunestones = runestonesRef.current.map((runestone) => ({
-        ...runestone,
-        visited: false,
-      }));
-      runestonesRef.current = unvisitedRunestones;
-      setRunestones(unvisitedRunestones);
+    if (runestonesRef.current.length > 0) {
+      refreshVisitedStatus();
     }
-  }, [authStore.user, authStore.loading]);
+  }, [visitedRunestonesStore.visitedRunestoneIds, refreshVisitedStatus]);
 
-  // Refetch runestones when auth loading state changes (in case user was already logged in)
+  // Fetch runestones when component mounts
   useEffect(() => {
-    if (!authStore.loading && runestones.length === 0) {
+    if (runestones.length === 0) {
       fetchAllRunestones();
     }
-  }, [authStore.loading, runestones.length, fetchAllRunestones]);
+  }, [runestones.length, fetchAllRunestones]);
 
   useEffect(() => {
     if (onVisitedCountChange) {
-      const visitedCount = runestones.filter((runestone) => runestone.visited).length;
-      onVisitedCountChange(visitedCount);
+      onVisitedCountChange(visitedRunestonesStore.visitedCount);
     }
-  }, [onVisitedCountChange, runestones]);
+  }, [onVisitedCountChange, visitedRunestonesStore.visitedCount]);
 
   // Navigate to selected runestone
   useEffect(() => {

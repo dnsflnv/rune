@@ -1,8 +1,8 @@
 import { Runestone } from '../types';
-import { supabaseRunestones } from '../services/supabaseRunestones';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { authStore } from '../stores/authStore';
+import { visitedRunestonesStore } from '../stores/visitedRunestonesStore';
 import { PageHeader } from './PageHeader';
 import { MiniMap } from './MiniMap';
 
@@ -14,38 +14,8 @@ interface RunestonePageProps {
 export const RunestonePage = observer(({ runestone, onVisitedStatusChange }: RunestonePageProps) => {
   const [isMarkingVisited, setIsMarkingVisited] = useState(false);
   const [visitedError, setVisitedError] = useState<string | null>(null);
-  const [isVisited, setIsVisited] = useState(false);
-  const [isCheckingVisited, setIsCheckingVisited] = useState(false);
 
-  const checkVisitedStatus = async () => {
-    if (!runestone) return;
-    setIsCheckingVisited(true);
-    try {
-      const visited = await supabaseRunestones.isVisited(runestone.id);
-      setIsVisited(visited);
-    } catch (error) {
-      console.error('Error checking visited status:', error);
-      setVisitedError('Failed to check visited status.');
-    } finally {
-      setIsCheckingVisited(false);
-    }
-  };
-
-  useEffect(() => {
-    if (runestone) {
-      checkVisitedStatus();
-    }
-  }, [runestone]);
-
-  // Refresh visited status when authentication state changes
-  useEffect(() => {
-    if (runestone && authStore.user) {
-      checkVisitedStatus();
-    } else if (!authStore.user) {
-      // Clear visited status when user logs out
-      setIsVisited(false);
-    }
-  }, [authStore.user, runestone]);
+  const isVisited = runestone ? visitedRunestonesStore.isRunestoneVisited(runestone.id) : false;
 
   // If no runestone, show loading or error
   if (!runestone) {
@@ -60,23 +30,23 @@ export const RunestonePage = observer(({ runestone, onVisitedStatusChange }: Run
   }
 
   const handleMarkAsVisited = async () => {
+    if (!runestone) return;
+
     setIsMarkingVisited(true);
     setVisitedError(null);
 
     try {
       if (isVisited) {
         // Unmark as visited
-        await supabaseRunestones.deleteVisited(runestone.id);
-        setIsVisited(false);
+        await visitedRunestonesStore.unmarkAsVisited(runestone.id);
         console.log('Runestone unmarked as visited!');
       } else {
         // Mark as visited
-        await supabaseRunestones.markAsVisited(runestone.id);
-        setIsVisited(true);
+        await visitedRunestonesStore.markAsVisited(runestone.id);
         console.log('Runestone marked as visited!');
       }
 
-      // Notify parent component to refresh map data
+      // Notify parent component to refresh map data (if callback provided)
       if (onVisitedStatusChange) {
         onVisitedStatusChange();
       }
@@ -128,7 +98,7 @@ export const RunestonePage = observer(({ runestone, onVisitedStatusChange }: Run
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          {isCheckingVisited ? (
+                          {visitedRunestonesStore.loading ? (
                             <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                           ) : (
                             <div
@@ -143,7 +113,7 @@ export const RunestonePage = observer(({ runestone, onVisitedStatusChange }: Run
                         </div>
                         <button
                           onClick={handleMarkAsVisited}
-                          disabled={isMarkingVisited || isCheckingVisited}
+                          disabled={isMarkingVisited || visitedRunestonesStore.loading}
                           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                             isVisited
                               ? 'bg-red-100 text-red-700 hover:bg-red-200'
