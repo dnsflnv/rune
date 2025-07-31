@@ -100,6 +100,16 @@ class AuthStore {
   }
 
   @computed
+  get isEmailConfirmed() {
+    return this.user?.email_confirmed_at !== undefined;
+  }
+
+  @computed
+  get isFullyAuthenticated() {
+    return this.isAuthenticated && this.isEmailConfirmed;
+  }
+
+  @computed
   get userId() {
     return this.user?.id;
   }

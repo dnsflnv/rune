@@ -15,11 +15,11 @@ class VisitedRunestonesStore {
   constructor() {
     makeObservable(this);
 
-    // React to auth changes - fetch visited runestones when user logs in, clear when logs out
+    // React to auth changes - fetch visited runestones when user logs in and email is confirmed, clear when logs out
     reaction(
-      () => authStore.user,
-      (user) => {
-        if (user) {
+      () => authStore.isFullyAuthenticated,
+      (isFullyAuthenticated) => {
+        if (isFullyAuthenticated) {
           this.fetchVisitedRunestones();
         } else {
           this.clearVisitedRunestones();
@@ -67,7 +67,7 @@ class VisitedRunestonesStore {
 
   @action
   async fetchVisitedRunestones() {
-    if (!authStore.user) {
+    if (!authStore.isFullyAuthenticated) {
       this.clearVisitedRunestones();
       return;
     }
@@ -97,8 +97,8 @@ class VisitedRunestonesStore {
 
   @action
   async markAsVisited(runestoneId: number): Promise<boolean> {
-    if (!authStore.user) {
-      console.warn('markAsVisited: User not logged in');
+    if (!authStore.isFullyAuthenticated) {
+      console.warn('markAsVisited: User not fully authenticated');
       return false;
     }
 
@@ -121,8 +121,8 @@ class VisitedRunestonesStore {
 
   @action
   async unmarkAsVisited(runestoneId: number): Promise<boolean> {
-    if (!authStore.user) {
-      console.warn('unmarkAsVisited: User not logged in');
+    if (!authStore.isFullyAuthenticated) {
+      console.warn('unmarkAsVisited: User not fully authenticated');
       return false;
     }
 
@@ -177,7 +177,7 @@ class VisitedRunestonesStore {
 
   @computed
   get isAuthenticated(): boolean {
-    return authStore.isAuthenticated;
+    return authStore.isFullyAuthenticated;
   }
 
   // Helper method to apply visited status to runestones array
