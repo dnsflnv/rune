@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { Runestone } from '../types';
-import { authService } from './auth';
+import { authStore } from '../stores/authStore';
 
 class SupabaseRunestonesService {
   private static instance: SupabaseRunestonesService;
@@ -98,7 +98,7 @@ class SupabaseRunestonesService {
   }
 
   async getAllVisitedRunestones(): Promise<Runestone[]> {
-    const user = authService.getUser();
+    const user = authStore.user;
     if (!user) {
       console.warn('getAllVisitedRunestones: User not logged in');
       return [];
@@ -116,7 +116,7 @@ class SupabaseRunestonesService {
   }
 
   async markAsVisited(runestoneId: number): Promise<boolean> {
-    const user = authService.getUser();
+    const user = authStore.user;
     if (!user) {
       console.warn('markAsVisited: User not logged in');
       return false;
@@ -135,7 +135,7 @@ class SupabaseRunestonesService {
   }
 
   async isVisited(runestoneId: number): Promise<boolean> {
-    const user = authService.getUser();
+    const user = authStore.user;
     if (!user) {
       console.warn('isVisited: User not logged in');
       return false;
@@ -154,7 +154,7 @@ class SupabaseRunestonesService {
   }
 
   async deleteVisited(runestoneId: number): Promise<boolean> {
-    const user = authService.getUser();
+    const user = authStore.user;
     if (!user) {
       console.warn('deleteVisited: User not logged in');
       return false;

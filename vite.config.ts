@@ -36,16 +36,21 @@ export default defineConfig({
       },
       output: {
         format: 'esm',
+        manualChunks: {
+          'react-mobx-idb-vendor': [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            'react-markdown',
+            'mobx',
+            'mobx-react-lite',
+            'idb',
+          ],
+          'maplibre-gl-vendor': ['maplibre-gl'],
+          'supabase-vendor': ['@supabase/supabase-js'],
+        },
       },
     },
-    // rollupOptions: {
-    //   output: {
-    //     manualChunks: {
-    //       'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-    //       'map-vendor': ['maplibre-gl']
-    //     }
-    //   }
-    // }
   },
   publicDir: 'public',
   server: {

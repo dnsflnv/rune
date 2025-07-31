@@ -1,13 +1,13 @@
-import { makeAutoObservable } from 'mobx';
+import { observable, computed, action, runInAction, makeObservable } from 'mobx';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
 class AuthStore {
-  user: User | null = null;
-  loading: boolean = true;
+  @observable user: User | null = null;
+  @observable loading: boolean = false;
 
   constructor() {
-    makeAutoObservable(this);
+    makeObservable(this);
     this.initializeAuth();
   }
 
@@ -16,22 +16,25 @@ class AuthStore {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      this.setUser(user);
+      runInAction(() => {
+        this.setUser(user);
+      });
     } catch (error) {
       console.error('Error initializing auth:', error);
-    } finally {
-      this.setLoading(false);
     }
   }
 
+  @action
   setUser(user: User | null) {
     this.user = user;
   }
 
+  @action
   setLoading(loading: boolean) {
     this.loading = loading;
   }
 
+  @action
   async signIn(email: string, password: string, captchaToken: string | null) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -41,10 +44,13 @@ class AuthStore {
       },
     });
     if (error) throw error;
-    this.setUser(data.user);
+    runInAction(() => {
+      this.setUser(data.user);
+    });
     return data;
   }
 
+  @action
   async signUp(email: string, password: string, captchaToken: string | null) {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -54,10 +60,13 @@ class AuthStore {
       },
     });
     if (error) throw error;
-    this.setUser(data.user);
+    runInAction(() => {
+      this.setUser(data.user);
+    });
     return data;
   }
 
+  @action
   async signInWithMagicLink(email: string) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -68,12 +77,16 @@ class AuthStore {
     if (error) throw error;
   }
 
+  @action
   async signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    this.setUser(null);
+    runInAction(() => {
+      this.setUser(null);
+    });
   }
 
+  @action
   async resetPassword(email: string) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
@@ -81,14 +94,17 @@ class AuthStore {
     if (error) throw error;
   }
 
+  @computed
   get isAuthenticated() {
     return this.user !== null;
   }
 
+  @computed
   get userId() {
     return this.user?.id;
   }
 
+  @computed
   get userEmail() {
     return this.user?.email;
   }
@@ -100,8 +116,12 @@ export const authStore = new AuthStore();
 // Set up Supabase auth state listener
 supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN') {
-    authStore.setUser(session?.user ?? null);
+    runInAction(() => {
+      authStore.setUser(session?.user ?? null);
+    });
   } else if (event === 'SIGNED_OUT') {
-    authStore.setUser(null);
+    runInAction(() => {
+      authStore.setUser(null);
+    });
   }
 });
