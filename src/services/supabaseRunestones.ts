@@ -112,6 +112,10 @@ class SupabaseRunestonesService {
       throw error;
     }
 
+    if (!data) {
+      return [];
+    }
+
     return data;
   }
 

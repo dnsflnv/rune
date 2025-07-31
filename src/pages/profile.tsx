@@ -2,64 +2,42 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { authStore } from '../stores/authStore';
-import { supabaseRunestones } from '../services/supabaseRunestones';
+import { visitedRunestonesStore } from '../stores/visitedRunestonesStore';
 import { Runestone } from '../types';
 import { PageHeader } from '../components/PageHeader';
 
 export const Profile = observer(() => {
-  const [visitedRunestones, setVisitedRunestones] = useState<Runestone[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalRunestones, setTotalRunestones] = useState(0);
   const [visitedRunestoneDetails, setVisitedRunestoneDetails] = useState<Runestone[]>([]);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadProfileData = async () => {
+    const loadVisitedRunestoneDetails = async () => {
+      if (!authStore.user || visitedRunestonesStore.loading) {
+        return;
+      }
+
+      if (visitedRunestonesStore.visitedCount === 0) {
+        setVisitedRunestoneDetails([]);
+        return;
+      }
+
+      setDetailsLoading(true);
+      setDetailsError(null);
+
       try {
-        setLoading(true);
-        setError(null);
-
-        // Wait for auth to be initialized
-        if (authStore.loading) {
-          return;
-        }
-
-        // Get current user
-        const currentUser = authStore.user;
-        if (!currentUser) {
-          setError('You must be logged in to view your profile');
-          setLoading(false);
-          return;
-        }
-
-        // Load visited runestones
-        const visited = await supabaseRunestones.getAllVisitedRunestones();
-        setVisitedRunestones(visited);
-
-        // Load full details for visited runestones
-        if (visited.length > 0) {
-          const allRunestones = await supabaseRunestones.getAllRunestones();
-          const visitedDetails = allRunestones.filter((runestone) =>
-            visited.some((visited) => visited.id === runestone.id)
-          );
-          setVisitedRunestoneDetails(visitedDetails);
-        } else {
-          setVisitedRunestoneDetails([]);
-        }
-
-        // Load total runestones count
-        const allRunestones = await supabaseRunestones.getAllRunestones();
-        setTotalRunestones(allRunestones.length);
+        const details = await visitedRunestonesStore.getVisitedRunestoneDetails();
+        setVisitedRunestoneDetails(details);
       } catch (err) {
-        console.error('Error loading profile data:', err);
-        setError('Failed to load profile data. Please try again.');
+        console.error('Error loading visited runestone details:', err);
+        setDetailsError('Failed to load runestone details. Please try again.');
       } finally {
-        setLoading(false);
+        setDetailsLoading(false);
       }
     };
 
-    loadProfileData();
-  }, [authStore.loading, authStore.user]);
+    loadVisitedRunestoneDetails();
+  }, [visitedRunestonesStore.visitedCount, authStore.user, visitedRunestonesStore.loading]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -90,7 +68,7 @@ export const Profile = observer(() => {
     );
   }
 
-  if (loading) {
+  if (visitedRunestonesStore.loading || detailsLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <PageHeader title="Profile" />
@@ -110,7 +88,8 @@ export const Profile = observer(() => {
     );
   }
 
-  if (error) {
+  if (visitedRunestonesStore.error || detailsError) {
+    const errorMessage = visitedRunestonesStore.error || detailsError;
     return (
       <div className="min-h-screen bg-gray-50">
         <PageHeader title="Profile" />
@@ -131,7 +110,7 @@ export const Profile = observer(() => {
                   </svg>
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-                <p className="text-gray-600 mb-4">{error}</p>
+                <p className="text-gray-600 mb-4">{errorMessage}</p>
               </div>
               <div className="bg-gray-50 px-6 py-4">
                 <div className="flex items-center justify-between">
@@ -196,7 +175,7 @@ export const Profile = observer(() => {
     );
   }
 
-  const completionPercentage = totalRunestones > 0 ? Math.round((visitedRunestones.length / totalRunestones) * 100) : 0;
+  // Use store values for stats
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -255,7 +234,7 @@ export const Profile = observer(() => {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-500">Visited Runestones</p>
-                      <p className="text-2xl font-semibold text-gray-900">{visitedRunestones.length}</p>
+                      <p className="text-2xl font-semibold text-gray-900">{visitedRunestonesStore.visitedCount}</p>
                     </div>
                   </div>
                 </div>
@@ -276,7 +255,9 @@ export const Profile = observer(() => {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-500">Total Runestones</p>
-                      <p className="text-2xl font-semibold text-gray-900">{totalRunestones}</p>
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {visitedRunestonesStore.totalRunestonesCount}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -297,7 +278,9 @@ export const Profile = observer(() => {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-500">Completion</p>
-                      <p className="text-2xl font-semibold text-gray-900">{completionPercentage}%</p>
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {visitedRunestonesStore.completionPercentage}%
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -308,13 +291,13 @@ export const Profile = observer(() => {
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-medium text-gray-900">Progress</h3>
                   <span className="text-sm text-gray-500">
-                    {visitedRunestones.length} of {totalRunestones} runestones
+                    {visitedRunestonesStore.visitedCount} of {visitedRunestonesStore.totalRunestonesCount} runestones
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div
                     className="bg-primary h-3 rounded-full transition-all duration-300"
-                    style={{ width: `${completionPercentage}%` }}
+                    style={{ width: `${visitedRunestonesStore.completionPercentage}%` }}
                   ></div>
                 </div>
               </div>

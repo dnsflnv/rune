@@ -1,12 +1,16 @@
 import { observable, computed, action, runInAction, makeObservable, reaction } from 'mobx';
 import { supabaseRunestones } from '../services/supabaseRunestones';
+import { runestonesCache } from '../services/runestonesCache';
 import { authStore } from './authStore';
 import { Runestone } from '../types';
+
+const TOTAL_RUNESTONES = 6815;
 
 class VisitedRunestonesStore {
   @observable visitedRunestoneIds: Set<number> = new Set();
   @observable loading: boolean = false;
   @observable error: string | null = null;
+  @observable totalRunestonesCount: number = TOTAL_RUNESTONES;
 
   constructor() {
     makeObservable(this);
@@ -41,6 +45,11 @@ class VisitedRunestonesStore {
   }
 
   @action
+  setTotalRunestonesCount(count: number) {
+    this.totalRunestonesCount = count;
+  }
+
+  @action
   addVisitedRunestone(id: number) {
     this.visitedRunestoneIds.add(id);
   }
@@ -67,6 +76,7 @@ class VisitedRunestonesStore {
     this.setError(null);
 
     try {
+      // Only fetch visited runestone IDs from Supabase
       const visitedRunestones = await supabaseRunestones.getAllVisitedRunestones();
       const visitedIds = new Set(visitedRunestones.map((rs) => rs.id));
 
@@ -143,6 +153,26 @@ class VisitedRunestonesStore {
   @computed
   get visitedCount(): number {
     return this.visitedRunestoneIds.size;
+  }
+
+  @computed
+  get completionPercentage(): number {
+    return this.totalRunestonesCount > 0 ? Math.round((this.visitedCount / this.totalRunestonesCount) * 100) : 0;
+  }
+
+  // Method to get visited runestone details from cache
+  async getVisitedRunestoneDetails(): Promise<Runestone[]> {
+    if (this.visitedRunestoneIds.size === 0) {
+      return [];
+    }
+
+    try {
+      const allRunestones = await runestonesCache.getAllRunestones();
+      return allRunestones.filter((runestone) => this.visitedRunestoneIds.has(runestone.id));
+    } catch (error) {
+      console.error('Error getting visited runestone details from cache:', error);
+      throw error;
+    }
   }
 
   @computed

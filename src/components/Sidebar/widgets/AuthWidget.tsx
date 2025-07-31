@@ -22,9 +22,9 @@ export const AuthWidget = observer(() => {
 
     try {
       if (isSignUp) {
-        await authStore.signUp(email, password, captchaToken);
+        await authStore.signUp(email, password, captchaToken || null);
       } else {
-        await authStore.signIn(email, password, captchaToken);
+        await authStore.signIn(email, password, captchaToken || null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -232,7 +232,7 @@ export const AuthWidget = observer(() => {
         </div>
         <button
           type="submit"
-          disabled={loading || !captchaToken}
+          disabled={loading}
           className="w-full px-3 py-2 text-sm text-white bg-primary rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
