@@ -18,13 +18,20 @@ export const AuthWidget = observer(() => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+
+    // Validate captcha completion
+    if (!captchaToken) {
+      setError('Please complete the captcha verification');
+      return;
+    }
+
     setLoading(true);
 
     try {
       if (isSignUp) {
-        await authStore.signUp(email, password, captchaToken || null);
+        await authStore.signUp(email, password, captchaToken);
       } else {
-        await authStore.signIn(email, password, captchaToken || null);
+        await authStore.signIn(email, password, captchaToken);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -259,19 +266,33 @@ export const AuthWidget = observer(() => {
         </div>
         {error && <div className="text-sm text-red-500">{error}</div>}
         {success && <div className="text-sm text-green-500">{success}</div>}
-        <div className="w-full flex justify-center">
-          <Turnstile
-            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ''}
-            onSuccess={(token) => setCaptchaToken(token)}
-            onError={() => setError('Captcha verification failed. Please try again.')}
-            options={{
-              size: 'compact',
-            }}
-          />
+        <div className="w-full">
+          <div className="text-xs text-gray-500 text-center mb-2">Complete captcha to continue</div>
+          <div className="flex justify-center">
+            <Turnstile
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ''}
+              onSuccess={(token) => {
+                console.log('Captcha completed successfully');
+                setCaptchaToken(token);
+              }}
+              onError={() => {
+                console.log('Captcha error occurred');
+                setError('Captcha verification failed. Please try again.');
+                setCaptchaToken(null);
+              }}
+              onExpire={() => {
+                console.log('Captcha expired');
+                setCaptchaToken(null);
+              }}
+              options={{
+                size: 'compact',
+              }}
+            />
+          </div>
         </div>
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !captchaToken}
           className="w-full px-3 py-2 text-sm text-white bg-primary rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
