@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { authStore } from '../../../stores/authStore';
-import { Turnstile } from '@marsidev/react-turnstile';
 
 export const AuthWidget = observer(() => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -12,26 +11,18 @@ export const AuthWidget = observer(() => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-
-    // Validate captcha completion
-    if (!captchaToken) {
-      setError('Please complete the captcha verification');
-      return;
-    }
-
     setLoading(true);
 
     try {
       if (isSignUp) {
-        await authStore.signUp(email, password, captchaToken);
+        await authStore.signUp(email, password);
       } else {
-        await authStore.signIn(email, password, captchaToken);
+        await authStore.signIn(email, password);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -83,7 +74,6 @@ export const AuthWidget = observer(() => {
 
   const handleToggleSignUp = () => {
     setIsSignUp(!isSignUp);
-    setCaptchaToken(null); // Reset captcha when switching modes
     setError(null);
     setSuccess(null);
   };
@@ -266,33 +256,9 @@ export const AuthWidget = observer(() => {
         </div>
         {error && <div className="text-sm text-red-500">{error}</div>}
         {success && <div className="text-sm text-green-500">{success}</div>}
-        <div className="w-full">
-          <div className="text-xs text-gray-500 text-center mb-2">Complete captcha to continue</div>
-          <div className="flex justify-center">
-            <Turnstile
-              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ''}
-              onSuccess={(token) => {
-                console.log('Captcha completed successfully');
-                setCaptchaToken(token);
-              }}
-              onError={() => {
-                console.log('Captcha error occurred');
-                setError('Captcha verification failed. Please try again.');
-                setCaptchaToken(null);
-              }}
-              onExpire={() => {
-                console.log('Captcha expired');
-                setCaptchaToken(null);
-              }}
-              options={{
-                size: 'compact',
-              }}
-            />
-          </div>
-        </div>
         <button
           type="submit"
-          disabled={loading || !captchaToken}
+          disabled={loading}
           className="w-full px-3 py-2 text-sm text-white bg-primary rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
