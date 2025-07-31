@@ -191,8 +191,9 @@ export const MapComponent = observer(({ onVisitedCountChange }: MapComponentProp
       console.error('Error removing layers:', error);
     }
 
-    // Create clustering approach
-    const geoJsonData = createGeoJSONData(runestones);
+    // Create clustering approach - always apply current visited status
+    const runestonesWithCurrentVisitedStatus = visitedRunestonesStore.applyVisitedStatus(runestonesRef.current);
+    const geoJsonData = createGeoJSONData(runestonesWithCurrentVisitedStatus);
 
     try {
       // Check if source already exists and try to update it first
