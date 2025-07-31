@@ -13,7 +13,7 @@ export const Profile = observer(() => {
 
   useEffect(() => {
     const loadVisitedRunestoneDetails = async () => {
-      if (!authStore.user || visitedRunestonesStore.loading) {
+      if (!authStore.isFullyAuthenticated || visitedRunestonesStore.loading) {
         return;
       }
 
@@ -37,7 +37,7 @@ export const Profile = observer(() => {
     };
 
     loadVisitedRunestoneDetails();
-  }, [visitedRunestonesStore.visitedCount, authStore.user, visitedRunestonesStore.loading]);
+  }, [visitedRunestonesStore.visitedCount, authStore.isFullyAuthenticated, visitedRunestonesStore.loading]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -154,6 +154,55 @@ export const Profile = observer(() => {
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Not Logged In</h2>
                 <p className="text-gray-600 mb-4">Please log in to view your profile and visited runestones.</p>
+              </div>
+              <div className="bg-gray-50 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-500">
+                    © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
+                  </div>
+                  <Link
+                    to="/"
+                    className="inline-block px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 transition-colors"
+                  >
+                    ← Back to Home
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (authStore.user && !authStore.isEmailConfirmed) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <PageHeader title="Profile" />
+
+        {/* Content */}
+        <div className="py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+              <div className="px-6 py-8 text-center">
+                <div className="text-yellow-500 mb-4">
+                  <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Email Confirmation Required</h2>
+                <p className="text-gray-600 mb-4">
+                  Please check your email ({authStore.user.email}) and click the confirmation link to access your
+                  profile.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Once confirmed, you'll be able to view your visited runestones and track your progress.
+                </p>
               </div>
               <div className="bg-gray-50 px-6 py-4">
                 <div className="flex items-center justify-between">
