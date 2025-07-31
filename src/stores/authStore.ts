@@ -35,13 +35,10 @@ class AuthStore {
   }
 
   @action
-  async signIn(email: string, password: string, captchaToken: string | null) {
+  async signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: {
-        captchaToken: captchaToken || undefined,
-      },
     });
     if (error) throw error;
     runInAction(() => {
@@ -51,13 +48,10 @@ class AuthStore {
   }
 
   @action
-  async signUp(email: string, password: string, captchaToken: string | null) {
+  async signUp(email: string, password: string) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        captchaToken: captchaToken || undefined,
-      },
     });
     if (error) throw error;
     runInAction(() => {

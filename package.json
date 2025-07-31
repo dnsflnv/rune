@@ -1,7 +1,7 @@
 {
   "name": "rune",
   "private": true,
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "author": "Denis Filonov",
   "license": "GPL-3.0-or-later",
@@ -15,7 +15,6 @@
     "node": ">=22.10.0 <23.0.0"
   },
   "dependencies": {
-    "@marsidev/react-turnstile": "^1.1.0",
     "@supabase/supabase-js": "^2.53.0",
     "@tailwindcss/postcss": "^4.1.11",
     "idb": "^8.0.3",
