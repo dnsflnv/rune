@@ -1,62 +1,79 @@
-import { makeAutoObservable } from 'mobx';
+import { observable, computed, action, runInAction, makeObservable } from 'mobx';
 import { Runestone } from '../types';
 import { runestonesCache } from '../services/runestonesCache';
 
 class SearchStore {
-  searchQuery: string = '';
-  searchResults: Runestone[] = [];
-  isLoading: boolean = false;
-  hasSearched: boolean = false;
-  selectedRunestone: Runestone | null = null;
+  @observable searchQuery: string = '';
+  @observable searchResults: Runestone[] = [];
+  @observable isLoading: boolean = false;
+  @observable hasSearched: boolean = false;
+  @observable selectedRunestone: Runestone | null = null;
 
   constructor() {
-    makeAutoObservable(this);
+    makeObservable(this);
   }
 
+  @action
   setSearchQuery(query: string) {
     this.searchQuery = query;
   }
 
+  @action
   setSearchResults(results: Runestone[]) {
     this.searchResults = results;
   }
 
+  @action
   setLoading(loading: boolean) {
     this.isLoading = loading;
   }
 
+  @action
   setHasSearched(searched: boolean) {
     this.hasSearched = searched;
   }
 
+  @action
   setSelectedRunestone(runestone: Runestone | null) {
     this.selectedRunestone = runestone;
   }
 
+  @action
   async performSearch(query: string) {
     if (!query.trim()) {
-      this.setSearchResults([]);
-      this.setHasSearched(false);
+      runInAction(() => {
+        this.setSearchResults([]);
+        this.setHasSearched(false);
+      });
       return;
     }
 
-    this.setSearchQuery(query);
-    this.setLoading(true);
-    this.setHasSearched(true);
+    runInAction(() => {
+      this.setSearchQuery(query);
+      this.setLoading(true);
+      this.setHasSearched(true);
+    });
 
     try {
       // Use the efficient search function from runestonesCache
       const results = await runestonesCache.searchRunestones(query, 100);
 
-      this.setSearchResults(results);
+      runInAction(() => {
+        this.setSearchResults(results);
+      });
     } catch (error) {
       console.error('Error performing search:', error);
-      this.setSearchResults([]);
+      runInAction(() => {
+        this.setSearchResults([]);
+      });
     } finally {
-      this.setLoading(false);
+      runInAction(() => {
+        this.setLoading(false);
+      });
     }
   }
 
+  @action
   clearSearch() {
     this.setSearchQuery('');
     this.setSearchResults([]);
@@ -64,14 +81,17 @@ class SearchStore {
     this.setSelectedRunestone(null);
   }
 
+  @computed
   get hasResults() {
     return this.searchResults.length > 0;
   }
 
+  @computed
   get resultCount() {
     return this.searchResults.length;
   }
 
+  @computed
   get isEmptySearch() {
     return this.hasSearched && !this.isLoading && this.searchResults.length === 0;
   }
