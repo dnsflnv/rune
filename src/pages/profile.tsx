@@ -216,7 +216,7 @@ export const Profile = observer(() => {
                       Member since {authStore.user.created_at ? formatDate(authStore.user.created_at) : 'Unknown'}
                     </p>
                   </div>
-                  <div className="shrink-0">
+                  <div className="shrink-0 flex space-x-3">
                     <button
                       onClick={() => authStore.signOut()}
                       className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -230,6 +230,16 @@ export const Profile = observer(() => {
                         />
                       </svg>
                       Sign Out
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Delete your account and all associated data? This cannot be undone.')) {
+                          authStore.deleteUser();
+                        }
+                      }}
+                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    >
+                      Delete Account
                     </button>
                   </div>
                 </div>

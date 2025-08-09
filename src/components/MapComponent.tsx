@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GeolocateControl, Map, GeoJSONSource } from 'maplibre-gl';
-import { runestonesCache } from '../services/runestonesCache';
+import { runestonesCache } from '@services/runestonesCache';
 import { Runestone, RunestoneFeature, RunestoneGeoJSON } from '../types';
 import { RunestoneModal } from './RunestoneModal';
 import { observer } from 'mobx-react-lite';
 
-import { searchStore } from '../stores/searchStore';
-import { visitedRunestonesStore } from '../stores/visitedRunestonesStore';
+import { searchStore } from '@stores/searchStore';
+import { visitedRunestonesStore } from '@stores/visitedRunestonesStore';
 
 // Cluster styling constants
 const CLUSTER_COLORS = {

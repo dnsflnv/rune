@@ -68,6 +68,7 @@ export default defineConfig({
       '@config': resolve(__dirname, './src/config'),
       '@contexts': resolve(__dirname, './src/contexts'),
       '@services': resolve(__dirname, './src/services'),
+      '@stores': resolve(__dirname, './src/stores'),
     },
   },
   assetsInclude: ['README.md', 'LICENSE.md'],
