@@ -1,4 +1,5 @@
-import { useRouteError, Link } from 'react-router-dom';
+import { useRouteError } from 'react-router-dom';
+import { Footer } from './components/Footer';
 
 export default function ErrorPage() {
   const error = useRouteError();
@@ -15,19 +16,7 @@ export default function ErrorPage() {
               <p className="text-accent italic">{(error as Error).message}</p>
             </div>
           </div>
-          <div className="bg-gray-50 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
-              </div>
-              <Link
-                to="/"
-                className="inline-block px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 transition-colors"
-              >
-                ← Back to Home
-              </Link>
-            </div>
-          </div>
+          <Footer />
         </div>
       </div>
     </div>
