@@ -1,4 +1,5 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
@@ -26,7 +27,43 @@
     /* Types */
     "types": [
       "vite/client"
-    ]
+    ],
+    "baseUrl": "./src",
+    "paths": {
+      "@components/*": [
+        "components/*"
+      ],
+      "@pages/*": [
+        "pages/*"
+      ],
+      "@assets/*": [
+        "assets/*"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@hooks/*": [
+        "hooks/*"
+      ],
+      "@types/*": [
+        "types/*"
+      ],
+      "@styles/*": [
+        "styles/*"
+      ],
+      "@config/*": [
+        "config/*"
+      ],
+      "@contexts/*": [
+        "contexts/*"
+      ],
+      "@services/*": [
+        "services/*"
+      ],
+      "@stores/*": [
+        "stores/*"
+      ]
+    }
   },
   "include": [
     "src"
