@@ -88,6 +88,15 @@ class AuthStore {
     if (error) throw error;
   }
 
+  @action
+  async deleteUser() {
+    const { error } = await supabase.rpc('delete_user');
+    if (error) throw error;
+    runInAction(() => {
+      this.setUser(null);
+    });
+  }
+
   @computed
   get isAuthenticated() {
     return this.user !== null;

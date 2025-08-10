@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import readmeContent from '../../README.md?raw';
 import { PageHeader } from '../components/PageHeader';
+import { Footer } from '../components/Footer';
 
 export const About = () => {
   return (
@@ -29,19 +29,7 @@ export const About = () => {
                 </ReactMarkdown>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-500">
-                  © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
-                </div>
-                <Link
-                  to="/"
-                  className="inline-block px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 transition-colors"
-                >
-                  ← Back to Home
-                </Link>
-              </div>
-            </div>
+            <Footer />
           </div>
         </div>
       </div>

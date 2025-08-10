@@ -5,6 +5,7 @@ import { authStore } from '../stores/authStore';
 import { visitedRunestonesStore } from '../stores/visitedRunestonesStore';
 import { Runestone } from '../types';
 import { PageHeader } from '../components/PageHeader';
+import { Footer } from '../components/Footer';
 
 export const Profile = observer(() => {
   const [visitedRunestoneDetails, setVisitedRunestoneDetails] = useState<Runestone[]>([]);
@@ -112,19 +113,7 @@ export const Profile = observer(() => {
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
                 <p className="text-gray-600 mb-4">{errorMessage}</p>
               </div>
-              <div className="bg-gray-50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">
-                    © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
-                  </div>
-                  <Link
-                    to="/"
-                    className="inline-block px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 transition-colors"
-                  >
-                    ← Back to Home
-                  </Link>
-                </div>
-              </div>
+              <Footer />
             </div>
           </div>
         </div>
@@ -155,19 +144,7 @@ export const Profile = observer(() => {
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Not Logged In</h2>
                 <p className="text-gray-600 mb-4">Please log in to view your profile and visited runestones.</p>
               </div>
-              <div className="bg-gray-50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">
-                    © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
-                  </div>
-                  <Link
-                    to="/"
-                    className="inline-block px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 transition-colors"
-                  >
-                    ← Back to Home
-                  </Link>
-                </div>
-              </div>
+              <Footer />
             </div>
           </div>
         </div>
@@ -204,19 +181,7 @@ export const Profile = observer(() => {
                   Once confirmed, you'll be able to view your visited runestones and track your progress.
                 </p>
               </div>
-              <div className="bg-gray-50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-500">
-                    © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
-                  </div>
-                  <Link
-                    to="/"
-                    className="inline-block px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 transition-colors"
-                  >
-                    ← Back to Home
-                  </Link>
-                </div>
-              </div>
+              <Footer />
             </div>
           </div>
         </div>
@@ -251,7 +216,7 @@ export const Profile = observer(() => {
                       Member since {authStore.user.created_at ? formatDate(authStore.user.created_at) : 'Unknown'}
                     </p>
                   </div>
-                  <div className="shrink-0">
+                  <div className="shrink-0 flex space-x-3">
                     <button
                       onClick={() => authStore.signOut()}
                       className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -265,6 +230,16 @@ export const Profile = observer(() => {
                         />
                       </svg>
                       Sign Out
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Delete your account and all associated data? This cannot be undone.')) {
+                          authStore.deleteUser();
+                        }
+                      }}
+                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    >
+                      Delete Account
                     </button>
                   </div>
                 </div>
@@ -419,19 +394,7 @@ export const Profile = observer(() => {
                 )}
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-500">
-                  © 2025 Runestone Safari, Developed by Denis Filonov in 2025, Täby, Sweden.
-                </div>
-                <Link
-                  to="/"
-                  className="inline-block px-4 py-2 text-sm font-medium text-white bg-primary rounded hover:bg-primary/90 transition-colors"
-                >
-                  ← Back to Home
-                </Link>
-              </div>
-            </div>
+            <Footer />
           </div>
         </div>
       </div>
