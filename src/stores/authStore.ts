@@ -1,13 +1,29 @@
-import { observable, computed, action, runInAction, makeObservable } from 'mobx';
+import { makeObservable, observable, computed, action, runInAction } from 'mobx';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 
 class AuthStore {
-  @observable user: User | null = null;
-  @observable loading: boolean = false;
+  user: User | null = null;
+  loading: boolean = false;
 
   constructor() {
-    makeObservable(this);
+    makeObservable(this, {
+      user: observable,
+      loading: observable,
+      setUser: action,
+      setLoading: action,
+      signIn: action,
+      signUp: action,
+      signInWithMagicLink: action,
+      signOut: action,
+      resetPassword: action,
+      deleteUser: action,
+      isAuthenticated: computed,
+      isEmailConfirmed: computed,
+      isFullyAuthenticated: computed,
+      userId: computed,
+      userEmail: computed,
+    });
     this.initializeAuth();
   }
 
@@ -24,17 +40,14 @@ class AuthStore {
     }
   }
 
-  @action
   setUser(user: User | null) {
     this.user = user;
   }
 
-  @action
   setLoading(loading: boolean) {
     this.loading = loading;
   }
 
-  @action
   async signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -47,7 +60,6 @@ class AuthStore {
     return data;
   }
 
-  @action
   async signUp(email: string, password: string) {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -60,7 +72,6 @@ class AuthStore {
     return data;
   }
 
-  @action
   async signInWithMagicLink(email: string) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -71,7 +82,6 @@ class AuthStore {
     if (error) throw error;
   }
 
-  @action
   async signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -80,7 +90,6 @@ class AuthStore {
     });
   }
 
-  @action
   async resetPassword(email: string) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
@@ -88,7 +97,6 @@ class AuthStore {
     if (error) throw error;
   }
 
-  @action
   async deleteUser() {
     const { error } = await supabase.rpc('delete_user');
     if (error) throw error;
@@ -97,27 +105,22 @@ class AuthStore {
     });
   }
 
-  @computed
   get isAuthenticated() {
     return this.user !== null;
   }
 
-  @computed
   get isEmailConfirmed() {
     return this.user?.email_confirmed_at !== undefined;
   }
 
-  @computed
   get isFullyAuthenticated() {
     return this.isAuthenticated && this.isEmailConfirmed;
   }
 
-  @computed
   get userId() {
     return this.user?.id;
   }
 
-  @computed
   get userEmail() {
     return this.user?.email;
   }

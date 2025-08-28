@@ -1,4 +1,4 @@
-import { observable, computed, action, runInAction, makeObservable, reaction } from 'mobx';
+import { makeObservable, observable, computed, action, runInAction, reaction } from 'mobx';
 import { supabaseRunestones } from '../services/supabaseRunestones';
 import { runestonesCache } from '../services/runestonesCache';
 import { authStore } from './authStore';
@@ -7,13 +7,33 @@ import { Runestone } from '../types';
 const TOTAL_RUNESTONES = 6815;
 
 class VisitedRunestonesStore {
-  @observable visitedRunestoneIds: Set<number> = new Set();
-  @observable loading: boolean = false;
-  @observable error: string | null = null;
-  @observable totalRunestonesCount: number = TOTAL_RUNESTONES;
+  visitedRunestoneIds: Set<number> = new Set();
+  loading: boolean = false;
+  error: string | null = null;
+  totalRunestonesCount: number = TOTAL_RUNESTONES;
 
   constructor() {
-    makeObservable(this);
+    makeObservable(this, {
+      visitedRunestoneIds: observable,
+      loading: observable,
+      error: observable,
+      totalRunestonesCount: observable,
+      setLoading: action,
+      setError: action,
+      setVisitedRunestoneIds: action,
+      setTotalRunestonesCount: action,
+      addVisitedRunestone: action,
+      removeVisitedRunestone: action,
+      clearVisitedRunestones: action,
+      fetchVisitedRunestones: action,
+      markAsVisited: action,
+      unmarkAsVisited: action,
+      isRunestoneVisited: computed,
+      visitedCount: computed,
+      completionPercentage: computed,
+      isAuthenticated: computed,
+      applyVisitedStatus: computed,
+    });
 
     // React to auth changes - fetch visited runestones when user logs in and email is confirmed, clear when logs out
     reaction(
@@ -29,43 +49,35 @@ class VisitedRunestonesStore {
     );
   }
 
-  @action
   setLoading(loading: boolean) {
     this.loading = loading;
   }
 
-  @action
   setError(error: string | null) {
     this.error = error;
   }
 
-  @action
   setVisitedRunestoneIds(ids: Set<number>) {
     this.visitedRunestoneIds = ids;
   }
 
-  @action
   setTotalRunestonesCount(count: number) {
     this.totalRunestonesCount = count;
   }
 
-  @action
   addVisitedRunestone(id: number) {
     this.visitedRunestoneIds.add(id);
   }
 
-  @action
   removeVisitedRunestone(id: number) {
     this.visitedRunestoneIds.delete(id);
   }
 
-  @action
   clearVisitedRunestones() {
     this.visitedRunestoneIds.clear();
     this.error = null;
   }
 
-  @action
   async fetchVisitedRunestones() {
     if (!authStore.isFullyAuthenticated) {
       this.clearVisitedRunestones();
@@ -95,7 +107,6 @@ class VisitedRunestonesStore {
     }
   }
 
-  @action
   async markAsVisited(runestoneId: number): Promise<boolean> {
     if (!authStore.isFullyAuthenticated) {
       console.warn('markAsVisited: User not fully authenticated');
@@ -119,7 +130,6 @@ class VisitedRunestonesStore {
     }
   }
 
-  @action
   async unmarkAsVisited(runestoneId: number): Promise<boolean> {
     if (!authStore.isFullyAuthenticated) {
       console.warn('unmarkAsVisited: User not fully authenticated');
@@ -143,19 +153,16 @@ class VisitedRunestonesStore {
     }
   }
 
-  @computed
   get isRunestoneVisited() {
     return (runestoneId: number): boolean => {
       return this.visitedRunestoneIds.has(runestoneId);
     };
   }
 
-  @computed
   get visitedCount(): number {
     return this.visitedRunestoneIds.size;
   }
 
-  @computed
   get completionPercentage(): number {
     return this.totalRunestonesCount > 0 ? Math.round((this.visitedCount / this.totalRunestonesCount) * 100) : 0;
   }
@@ -175,13 +182,11 @@ class VisitedRunestonesStore {
     }
   }
 
-  @computed
   get isAuthenticated(): boolean {
     return authStore.isFullyAuthenticated;
   }
 
   // Helper method to apply visited status to runestones array
-  @computed
   get applyVisitedStatus() {
     return (runestones: Runestone[]): Runestone[] => {
       return runestones.map((runestone) => ({
